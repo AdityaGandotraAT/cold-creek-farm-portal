@@ -1,0 +1,88 @@
+export const clients = [
+  {
+    id: 'cli-1008',
+    name: 'Harper Bennett',
+    email: 'harper.bennett@email.com',
+    phone: '(706) 555-0142',
+    eventDate: '2026-10-11',
+    venue: 'The Barn',
+    bookingStatus: 'Confirmed',
+    referenceNumber: 'CCF-2026-1008',
+  },
+  {
+    id: 'cli-1012',
+    name: 'Amelia Whitaker',
+    email: 'amelia.whitaker@email.com',
+    phone: '(770) 555-0198',
+    eventDate: '2026-10-24',
+    venue: 'Farmhouse Lawn',
+    bookingStatus: 'Confirmed',
+    referenceNumber: 'CCF-2026-1012',
+  },
+  {
+    id: 'cli-1015',
+    name: 'Elena Ruiz',
+    email: 'elena.ruiz@email.com',
+    phone: '(404) 555-0174',
+    eventDate: '2026-11-07',
+    venue: 'The Barn',
+    bookingStatus: 'Confirmed',
+    referenceNumber: 'CCF-2026-1015',
+  },
+  {
+    id: 'cli-1019',
+    name: 'Claire Ellison',
+    email: 'claire.ellison@email.com',
+    phone: '(678) 555-0116',
+    eventDate: '2026-11-21',
+    venue: 'Creek Pavilion',
+    bookingStatus: 'Pending',
+    referenceNumber: 'CCF-2026-1019',
+  },
+  {
+    id: 'cli-1024',
+    name: 'Sophia Grant',
+    email: 'sophia.grant@email.com',
+    phone: '(706) 555-0188',
+    eventDate: '2026-12-05',
+    venue: 'The Barn',
+    bookingStatus: 'Confirmed',
+    referenceNumber: 'CCF-2026-1024',
+  },
+  {
+    id: 'cli-1028',
+    name: 'Jordan Hale',
+    email: 'jordan.hale@email.com',
+    phone: '(470) 555-0133',
+    eventDate: '2026-12-19',
+    venue: 'Farmhouse Lawn',
+    bookingStatus: 'Pending',
+    referenceNumber: 'CCF-2026-1028',
+  },
+  {
+    id: 'cli-1031',
+    name: 'Maya Patel',
+    email: 'maya.patel@email.com',
+    phone: '(404) 555-0160',
+    eventDate: '2027-03-14',
+    venue: 'The Barn',
+    bookingStatus: 'Confirmed',
+    referenceNumber: 'CCF-2027-1031',
+  },
+  {
+    id: 'cli-1036',
+    name: 'Owen Brooks',
+    email: 'owen.brooks@email.com',
+    phone: '(706) 555-0127',
+    eventDate: '2027-04-18',
+    venue: 'Creek Pavilion',
+    bookingStatus: 'Pending',
+    referenceNumber: 'CCF-2027-1036',
+  },
+];
+
+export const bookingStatusOptions = ['Confirmed', 'Pending'];
+
+export const venueOptions = ['The Barn', 'Farmhouse Lawn', 'Creek Pavilion'];
+
+export const eventTypeOptions = ['Wedding', 'Reception'];

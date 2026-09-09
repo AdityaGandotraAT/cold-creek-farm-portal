@@ -1,0 +1,62 @@
+:root {
+  --color-bg: #f4f2ee;
+  --color-surface: #ffffff;
+  --color-panel: #f7f5f1;
+  --color-text: #243028;
+  --color-text-muted: #5c635d;
+  --color-border: #ddd8d0;
+  --color-accent: #2d402b;
+  --color-focus: #2d402b;
+  --color-button: #2d402b;
+  --color-button-text: #ffffff;
+  --color-notice-bg: #f7f6f3;
+  --color-badge-ok-bg: #e7efe6;
+  --color-badge-ok-text: #2d402b;
+  --color-badge-pending-bg: #f4ead8;
+  --color-badge-pending-text: #7a5a2e;
+  --color-badge-alert-bg: #f3e4e1;
+  --color-badge-alert-text: #7a2e2e;
+  --color-track: #ece7df;
+  --color-fill: #2d402b;
+  --color-fill-complete: #3f6b3c;
+  --color-chart-selected: #2d402b;
+  --color-chart-pending: #b08d6a;
+  --color-chart-unavailable: #a45b4e;
+  --color-hover-row: #faf8f5;
+  --font-sans: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --radius: 8px;
+  --shadow: 0 12px 40px rgba(36, 48, 40, 0.08);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+body[data-admin-theme='dark'] {
+  color: #f4f2ee;
+  background: #1c241f;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}

@@ -1,0 +1,27 @@
+.brand-mark {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  overflow: visible;
+}
+
+.brand-mark__logo {
+  display: block;
+  width: min(360px, 100%);
+  height: auto;
+  object-fit: contain;
+  background: transparent;
+  filter: drop-shadow(0 8px 22px rgba(0, 0, 0, 0.08));
+}
+
+@media (max-width: 900px) {
+  .brand-mark__logo {
+    width: min(240px, 70%);
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-mark__logo {
+    width: min(200px, 78%);
+  }
+}

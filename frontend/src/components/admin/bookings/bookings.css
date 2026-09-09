@@ -1,0 +1,126 @@
+.bookings-table {
+  min-width: 1080px;
+}
+
+.bookings-table-wrap {
+  -webkit-overflow-scrolling: touch;
+}
+
+.bookings-progress {
+  font-variant-numeric: tabular-nums;
+  font-weight: 650;
+}
+
+.bookings-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.bookings-empty .admin-icon {
+  width: 28px;
+  height: 28px;
+  color: var(--color-text-muted);
+}
+
+.bookings-empty span {
+  max-width: 28rem;
+  font-size: 0.85rem;
+}
+
+.bookings-progress-cell {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.booking-summary h3,
+.booking-selections h3 {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+}
+
+.booking-summary__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px 24px;
+  margin: 16px 0 0;
+}
+
+.booking-summary__grid dt {
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.booking-summary__grid dd {
+  margin: 4px 0 0;
+}
+
+.booking-lock {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin: 0 0 16px;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-panel);
+}
+
+.booking-lock.is-open {
+  background: var(--color-badge-ok-bg);
+  border-color: var(--color-border);
+  box-shadow: inset 3px 0 0 var(--color-fill-complete);
+}
+
+.booking-lock.is-locked {
+  background: var(--color-badge-pending-bg);
+  border-color: var(--color-border);
+  box-shadow: inset 3px 0 0 var(--color-chart-pending);
+}
+
+.booking-lock__copy {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.booking-lock__title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-weight: 650;
+}
+
+.booking-lock p {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.booking-lock__rule {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+.booking-selections__hint {
+  margin: 0 0 16px;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+}
+
+.booking-selections__table {
+  min-width: 520px;
+}
+
+@media (max-width: 800px) {
+  .booking-summary__grid {
+    grid-template-columns: 1fr;
+  }
+}

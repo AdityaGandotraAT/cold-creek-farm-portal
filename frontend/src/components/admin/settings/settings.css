@@ -1,0 +1,146 @@
+.settings-page {
+  max-width: 760px;
+}
+
+.settings-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings-note {
+  margin: -8px 0 16px;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.settings-saved {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #e7efe6;
+  color: #2d402b;
+  font-size: 0.9rem;
+}
+
+.settings-card .client-form__grid {
+  margin-bottom: 16px;
+}
+
+.settings-toggles {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.settings-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.settings-toggle:first-child {
+  padding-top: 0;
+}
+
+.settings-toggle:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.settings-toggle span {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-toggle label {
+  font-size: 0.92rem;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.settings-toggle small {
+  color: var(--color-text-muted);
+  font-size: 0.82rem;
+}
+
+.settings-toggle input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 42px;
+  height: 24px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 999px;
+  background: #cfc8bd;
+  cursor: pointer;
+  position: relative;
+}
+
+.settings-toggle input::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ffffff;
+  transition: transform 0.15s ease;
+}
+
+.settings-toggle input:checked {
+  background: var(--color-accent);
+}
+
+.settings-toggle input:checked::after {
+  transform: translateX(18px);
+}
+
+.settings-toggle input:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+@media (max-width: 560px) {
+  .settings-toggle {
+    gap: 12px;
+  }
+
+  .settings-toggle input {
+    width: 46px;
+    height: 26px;
+  }
+}
+
+.admin-shell[data-theme='dark'] .settings-saved {
+  background: #314536;
+  color: #e7efe6;
+}
+
+.admin-shell[data-theme='dark'] .settings-toggle input {
+  background: #5c635d;
+}
+
+.admin-shell[data-theme='dark'] .settings-toggle input:checked {
+  background: var(--color-accent);
+}
+
+.settings-modal {
+  width: min(460px, 100%);
+}
+
+.settings-modal .settings-saved {
+  margin-bottom: 12px;
+}
+
+.settings-modal__fields {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 18px;
+}
