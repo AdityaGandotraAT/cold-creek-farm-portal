@@ -15,7 +15,7 @@ function BookingTable({ bookings, onView, onEdit }) {
       <div className="clients-empty bookings-empty">
         <Icon name="bookings" />
         <p>No bookings found.</p>
-        <span>Try a different couple name, booking number, venue, or filter.</span>
+        <span>Try a different name, booking number, venue, or filter.</span>
       </div>
     );
   }
@@ -26,7 +26,7 @@ function BookingTable({ bookings, onView, onEdit }) {
         <table className="clients-table bookings-table">
           <thead>
             <tr>
-              <th>Couple Name</th>
+              <th>Name</th>
               <th>Booking/Reference Number</th>
               <th>Event Date</th>
               <th>Event Time</th>
@@ -55,7 +55,7 @@ function BookingTable({ bookings, onView, onEdit }) {
           <li key={booking.id} className="clients-card">
             <div className="clients-card__top">
               <div>
-                <strong>{booking.coupleName}</strong>
+                <strong>{booking.name}</strong>
                 <div className="clients-table__ref">{booking.referenceNumber}</div>
               </div>
               <StatusBadge tone={bookingStatusTone(booking.bookingStatus)}>

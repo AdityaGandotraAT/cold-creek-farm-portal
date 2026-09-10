@@ -8,7 +8,7 @@ function VendorTable({ vendors, onView, onEdit }) {
       <div className="clients-empty vendors-empty">
         <Icon name="vendors" />
         <p>No vendors found.</p>
-        <span>Try a different name, company, category, or status filter.</span>
+        <span>Try a different name, category, email, or phone.</span>
       </div>
     );
   }
@@ -19,12 +19,11 @@ function VendorTable({ vendors, onView, onEdit }) {
         <table className="clients-table vendors-table">
           <thead>
             <tr>
-              <th>Vendor Name</th>
-              <th>Company Name</th>
               <th>Category</th>
-              <th>Email</th>
+              <th>Name</th>
               <th>Phone</th>
-              <th>Status</th>
+              <th>Email</th>
+              <th>Website</th>
               <th>Actions</th>
             </tr>
           </thead>

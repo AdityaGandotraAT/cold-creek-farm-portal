@@ -24,6 +24,7 @@ export function subscribeVendors(listener) {
 export function addVendor(payload) {
   const vendor = {
     id: `vnd-${nextId}`,
+    status: 'Active',
     ...payload,
   };
   nextId += 1;

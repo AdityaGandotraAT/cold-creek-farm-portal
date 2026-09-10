@@ -11,10 +11,12 @@ export const vendorCategories = [
 
 export const bookingStatusOptions = ['Confirmed', 'Pending'];
 
-export const bookings = [
+export const venueOptions = ['The Barn', 'Farmhouse Lawn', 'Creek Pavilion', 'Cold Creek Farm'];
+
+export const seedBookings = [
   {
     id: 'bkg-1001',
-    coupleName: 'John & Sarah Bennett',
+    name: 'Sarah Bennett',
     referenceNumber: 'CCF-2026-001',
     eventDate: '2026-10-18',
     eventStartTime: '17:00',
@@ -26,7 +28,7 @@ export const bookings = [
   },
   {
     id: 'bkg-1008',
-    coupleName: 'Harper & Cole Bennett',
+    name: 'Cole Bennett',
     referenceNumber: 'CCF-2026-1008',
     eventDate: '2026-10-11',
     eventStartTime: '16:00',
@@ -38,7 +40,7 @@ export const bookings = [
   },
   {
     id: 'bkg-1012',
-    coupleName: 'Amelia & James Whitaker',
+    name: 'Amelia Whitaker',
     referenceNumber: 'CCF-2026-1012',
     eventDate: '2026-10-24',
     eventStartTime: '17:30',
@@ -50,7 +52,7 @@ export const bookings = [
   },
   {
     id: 'bkg-1015',
-    coupleName: 'Elena & Mateo Ruiz',
+    name: 'Mateo Ruiz',
     referenceNumber: 'CCF-2026-1015',
     eventDate: '2026-11-07',
     eventStartTime: '15:00',
@@ -62,7 +64,7 @@ export const bookings = [
   },
   {
     id: 'bkg-1019',
-    coupleName: 'Claire & Noah Ellison',
+    name: 'Claire Ellison',
     referenceNumber: 'CCF-2026-1019',
     eventDate: '2026-11-21',
     eventStartTime: '16:30',
@@ -74,7 +76,7 @@ export const bookings = [
   },
   {
     id: 'bkg-1024',
-    coupleName: 'Sophia & Liam Grant',
+    name: 'Sophia Grant',
     referenceNumber: 'CCF-2026-1024',
     eventDate: '2026-12-05',
     eventStartTime: '17:00',
@@ -86,7 +88,7 @@ export const bookings = [
   },
   {
     id: 'bkg-1028',
-    coupleName: 'Jordan & Avery Hale',
+    name: 'Avery Hale',
     referenceNumber: 'CCF-2026-1028',
     eventDate: '2026-12-19',
     eventStartTime: '16:00',
@@ -98,7 +100,7 @@ export const bookings = [
   },
   {
     id: 'bkg-1031',
-    coupleName: 'Maya & Rohan Patel',
+    name: 'Maya Patel',
     referenceNumber: 'CCF-2027-1031',
     eventDate: '2027-03-14',
     eventStartTime: '17:00',

@@ -1,19 +1,22 @@
 import { Icon } from '../AdminIcons.jsx';
-import StatusBadge from '../clients/StatusBadge.jsx';
-import { vendorStatusTone } from './format.js';
 
 function VendorRow({ vendor, onView, onEdit }) {
   return (
     <tr>
+      <td>{vendor.category}</td>
       <td>
         <strong>{vendor.name}</strong>
       </td>
-      <td>{vendor.company}</td>
-      <td>{vendor.category}</td>
-      <td>{vendor.email || '—'}</td>
       <td>{vendor.phone || '—'}</td>
+      <td>{vendor.email || '—'}</td>
       <td>
-        <StatusBadge tone={vendorStatusTone(vendor.status)}>{vendor.status}</StatusBadge>
+        {vendor.website ? (
+          <a href={vendor.website} target="_blank" rel="noreferrer">
+            {vendor.website.replace(/^https?:\/\//i, '')}
+          </a>
+        ) : (
+          '—'
+        )}
       </td>
       <td>
         <div className="clients-table__actions">

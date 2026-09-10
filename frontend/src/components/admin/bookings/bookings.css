@@ -36,6 +36,12 @@
   gap: 8px;
 }
 
+.booking-form__note {
+  margin: 0 0 16px;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+}
+
 .booking-summary h3,
 .booking-selections h3 {
   margin: 0 0 6px;

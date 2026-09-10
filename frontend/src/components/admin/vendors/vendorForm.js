@@ -1,17 +1,11 @@
-import { vendorCategories, vendorStatusOptions } from '../../../data/vendorsMock.js';
+import { vendorCategories } from '../../../data/vendorsMock.js';
 
 export const emptyVendorForm = {
-  name: '',
-  company: '',
   category: '',
-  email: '',
+  name: '',
   phone: '',
+  email: '',
   website: '',
-  address: '',
-  description: '',
-  services: '',
-  pricing: '',
-  status: 'Active',
 };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -22,6 +16,19 @@ function digitsOnly(value) {
 
 function isValidPhone(value) {
   return digitsOnly(value).length === 10;
+}
+
+function normalizeWebsite(value) {
+  const trimmed = String(value || '').trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+
+  return `https://${trimmed}`;
 }
 
 function isValidUrl(value) {
@@ -35,30 +42,16 @@ function isValidUrl(value) {
 
 export function vendorToForm(vendor) {
   return {
-    name: vendor.name || '',
-    company: vendor.company || '',
     category: vendor.category || '',
-    email: vendor.email || '',
+    name: vendor.name || '',
     phone: vendor.phone || '',
+    email: vendor.email || '',
     website: vendor.website || '',
-    address: vendor.address || '',
-    description: vendor.description || '',
-    services: vendor.services || '',
-    pricing: vendor.pricing || '',
-    status: vendor.status || 'Active',
   };
 }
 
 export function validateVendorForm(values) {
   const errors = {};
-
-  if (!values.name.trim()) {
-    errors.name = 'Enter a vendor name.';
-  }
-
-  if (!values.company.trim()) {
-    errors.company = 'Enter a company name.';
-  }
 
   if (!values.category) {
     errors.category = 'Select a vendor category.';
@@ -66,26 +59,23 @@ export function validateVendorForm(values) {
     errors.category = 'Select a vendor category.';
   }
 
-  if (!values.email.trim()) {
-    errors.email = 'Enter an email address.';
-  } else if (!EMAIL_PATTERN.test(values.email.trim())) {
-    errors.email = 'Enter a valid email address.';
+  if (!values.name.trim()) {
+    errors.name = 'Enter the vendor name.';
   }
 
-  if (!values.phone.trim()) {
-    errors.phone = 'Enter a phone number.';
-  } else if (!isValidPhone(values.phone)) {
+  if (values.phone.trim() && !isValidPhone(values.phone)) {
     errors.phone = 'Enter a valid 10-digit phone number.';
   }
 
-  if (values.website.trim() && !isValidUrl(values.website.trim())) {
-    errors.website = 'Enter a valid URL starting with http:// or https://.';
+  if (values.email.trim() && !EMAIL_PATTERN.test(values.email.trim())) {
+    errors.email = 'Enter a valid email address.';
   }
 
-  if (!values.status) {
-    errors.status = 'Select a status.';
-  } else if (!vendorStatusOptions.includes(values.status)) {
-    errors.status = 'Select Active or Inactive.';
+  if (values.website.trim()) {
+    const website = normalizeWebsite(values.website);
+    if (!isValidUrl(website)) {
+      errors.website = 'Enter a valid website.';
+    }
   }
 
   return errors;
@@ -93,16 +83,11 @@ export function validateVendorForm(values) {
 
 export function toVendorPayload(values) {
   return {
-    name: values.name.trim(),
-    company: values.company.trim(),
     category: values.category,
-    email: values.email.trim(),
+    name: values.name.trim(),
     phone: values.phone.trim(),
-    website: values.website.trim(),
-    address: values.address.trim(),
-    description: values.description.trim(),
-    services: values.services.trim(),
-    pricing: values.pricing.trim(),
-    status: values.status,
+    email: values.email.trim(),
+    website: normalizeWebsite(values.website),
+    status: 'Active',
   };
 }

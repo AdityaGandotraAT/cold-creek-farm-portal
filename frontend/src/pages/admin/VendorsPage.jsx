@@ -7,7 +7,7 @@ import SearchBar from '../../components/admin/clients/SearchBar.jsx';
 import '../../components/admin/clients/clients.css';
 import VendorTable from '../../components/admin/vendors/VendorTable.jsx';
 import '../../components/admin/vendors/vendors.css';
-import { vendorCategories, vendorStatusOptions } from '../../data/vendorsMock.js';
+import { vendorCategories } from '../../data/vendorsMock.js';
 import { getVendors, subscribeVendors } from '../../data/vendorsStore.js';
 
 function matchesSearch(vendor, query) {
@@ -15,7 +15,7 @@ function matchesSearch(vendor, query) {
     return true;
   }
 
-  const haystack = [vendor.name, vendor.company, vendor.category, vendor.email, vendor.phone]
+  const haystack = [vendor.name, vendor.category, vendor.email, vendor.phone, vendor.website]
     .join(' ')
     .toLowerCase();
 
@@ -28,7 +28,6 @@ function VendorsPage() {
   const vendors = useSyncExternalStore(subscribeVendors, getVendors, getVendors);
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState(searchParams.get('category') || '');
-  const [status, setStatus] = useState('');
   const normalizedQuery = query.trim().toLowerCase();
 
   const visibleVendors = useMemo(
@@ -42,20 +41,16 @@ function VendorsPage() {
           return false;
         }
 
-        if (status && vendor.status !== status) {
-          return false;
-        }
-
         return true;
       }),
-    [vendors, normalizedQuery, category, status],
+    [vendors, normalizedQuery, category],
   );
 
   return (
     <div className="clients-page">
       <PageHeader
         title="Vendors"
-        description="Manage vendors and their service categories for Cold Creek Farm events."
+        description="The Cold Creek Farm preferred vendor list: category, name, phone, email, and website."
         action={
           <button className="clients-add" type="button" onClick={() => navigate('/admin/vendors/new')}>
             <Icon name="plus" />
@@ -64,12 +59,12 @@ function VendorsPage() {
         }
       />
 
-      <div className="clients-toolbar">
+      <div className="clients-toolbar vendors-toolbar">
         <SearchBar
           id="vendor-search"
           value={query}
           onChange={setQuery}
-          placeholder="Search vendors by name, company, email, or phone"
+          placeholder="Search by name, category, email, or phone"
         />
         <Filter id="vendor-category-filter" label="Category">
           <select
@@ -79,20 +74,6 @@ function VendorsPage() {
           >
             <option value="">All Categories</option>
             {vendorCategories.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </Filter>
-        <Filter id="vendor-status-filter" label="Status">
-          <select
-            id="vendor-status-filter"
-            value={status}
-            onChange={(event) => setStatus(event.target.value)}
-          >
-            <option value="">All</option>
-            {vendorStatusOptions.map((option) => (
               <option key={option} value={option}>
                 {option}
               </option>

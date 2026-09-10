@@ -6,6 +6,30 @@
   -webkit-overflow-scrolling: touch;
 }
 
+.vendors-table a {
+  color: var(--color-accent);
+}
+
+.vendors-toolbar {
+  grid-template-columns: minmax(0, 1.6fr) minmax(200px, 0.8fr);
+}
+
+@media (max-width: 960px) {
+  .vendors-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .vendors-toolbar .clients-search {
+    grid-column: auto;
+  }
+}
+
+.vendor-form__note {
+  margin: 0 0 16px;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+}
+
 .clients-badge--inactive {
   background: #ececec;
   color: #5c5c5c;

@@ -14,7 +14,7 @@ function BookingRow({ booking, onView, onEdit }) {
   return (
     <tr>
       <td>
-        <strong>{booking.coupleName}</strong>
+        <strong>{booking.name}</strong>
       </td>
       <td>{booking.referenceNumber}</td>
       <td>{formatEventDate(booking.eventDate)}</td>

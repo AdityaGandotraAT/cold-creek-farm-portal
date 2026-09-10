@@ -29,13 +29,12 @@ let nextVendorId = 1001;
 function vendor(fields) {
   const record = {
     id: `vnd-${nextVendorId}`,
-    website: '',
-    address: '',
-    description: '',
-    services: '',
-    pricing: '',
+    name: fields.company || fields.name,
+    category: fields.category,
+    phone: fields.phone || '',
+    email: fields.email || '',
+    website: fields.website || '',
     status: 'Active',
-    ...fields,
   };
   nextVendorId += 1;
   return record;

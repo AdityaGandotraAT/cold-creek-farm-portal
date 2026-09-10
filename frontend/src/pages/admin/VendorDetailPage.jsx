@@ -32,7 +32,7 @@ function VendorDetailPage() {
       </Link>
       <PageHeader
         title={`View Vendor: ${vendor.name}`}
-        description="Review this vendor in the Cold Creek Farm master list."
+        description="The same details Cold Creek Farm shares on the vendor list."
         action={
           <button
             className="clients-add"

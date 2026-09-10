@@ -50,8 +50,8 @@ function VendorFormPage({ mode }) {
         title={isEdit ? `Edit Vendor: ${vendor.name}` : 'Add Vendor'}
         description={
           isEdit
-            ? 'Update this vendor in the Cold Creek Farm master list.'
-            : 'Add a vendor to the Cold Creek Farm master list.'
+            ? 'Update this vendor using the same details as the Cold Creek Farm vendor list.'
+            : 'Add a vendor using the same details as the Cold Creek Farm vendor list.'
         }
       />
       <VendorForm

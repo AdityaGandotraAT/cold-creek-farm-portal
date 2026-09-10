@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useSyncExternalStore } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '../../components/admin/AdminIcons.jsx';
 import BookingTable from '../../components/admin/bookings/BookingTable.jsx';
@@ -7,14 +7,15 @@ import Filter from '../../components/admin/clients/Filter.jsx';
 import PageHeader from '../../components/admin/clients/PageHeader.jsx';
 import SearchBar from '../../components/admin/clients/SearchBar.jsx';
 import '../../components/admin/clients/clients.css';
-import { bookingStatusOptions, bookings as mockBookings } from '../../data/bookingsMock.js';
+import { bookingStatusOptions } from '../../data/bookingsMock.js';
+import { getBookings, subscribeBookings } from '../../data/bookingsStore.js';
 
 function matchesSearch(booking, query) {
   if (!query) {
     return true;
   }
 
-  const haystack = [booking.coupleName, booking.referenceNumber, booking.venue]
+  const haystack = [booking.name, booking.referenceNumber, booking.venue]
     .join(' ')
     .toLowerCase();
 
@@ -23,6 +24,7 @@ function matchesSearch(booking, query) {
 
 function BookingsPage() {
   const navigate = useNavigate();
+  const bookings = useSyncExternalStore(subscribeBookings, getBookings, getBookings);
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('');
   const [eventDate, setEventDate] = useState('');
@@ -30,7 +32,7 @@ function BookingsPage() {
 
   const visibleBookings = useMemo(
     () =>
-      mockBookings.filter((booking) => {
+      bookings.filter((booking) => {
         if (!matchesSearch(booking, normalizedQuery)) {
           return false;
         }
@@ -45,7 +47,7 @@ function BookingsPage() {
 
         return true;
       }),
-    [normalizedQuery, status, eventDate],
+    [bookings, normalizedQuery, status, eventDate],
   );
 
   return (
@@ -70,7 +72,7 @@ function BookingsPage() {
           id="booking-search"
           value={query}
           onChange={setQuery}
-          placeholder="Search by couple name, booking number, or venue"
+          placeholder="Search by name, booking number, or venue"
         />
         <Filter id="booking-status-filter" label="Booking Status">
           <select

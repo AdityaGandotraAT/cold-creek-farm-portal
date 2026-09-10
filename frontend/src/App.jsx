@@ -3,7 +3,8 @@ import AdminLayout from './components/admin/AdminLayout.jsx';
 import RequireAdmin from './components/admin/RequireAdmin.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import BookingsPage from './pages/admin/BookingsPage.jsx';
-import BookingPlaceholderPage from './pages/admin/BookingPlaceholderPage.jsx';
+import BookingFormPage from './pages/admin/BookingFormPage.jsx';
+import BookingViewPage from './pages/admin/BookingViewPage.jsx';
 import ClientsPage from './pages/admin/ClientsPage.jsx';
 import AddClientPage from './pages/admin/AddClientPage.jsx';
 import DashboardPage from './pages/admin/DashboardPage.jsx';
@@ -28,9 +29,9 @@ function App() {
           <Route path="/admin/clients" element={<ClientsPage />} />
           <Route path="/admin/clients/new" element={<AddClientPage />} />
           <Route path="/admin/bookings" element={<BookingsPage />} />
-          <Route path="/admin/bookings/new" element={<BookingPlaceholderPage mode="add" />} />
-          <Route path="/admin/bookings/:bookingId/edit" element={<BookingPlaceholderPage mode="edit" />} />
-          <Route path="/admin/bookings/:bookingId" element={<BookingPlaceholderPage mode="view" />} />
+          <Route path="/admin/bookings/new" element={<BookingFormPage mode="add" />} />
+          <Route path="/admin/bookings/:bookingId/edit" element={<BookingFormPage mode="edit" />} />
+          <Route path="/admin/bookings/:bookingId" element={<BookingViewPage />} />
           <Route path="/admin/vendors" element={<VendorsPage />} />
           <Route path="/admin/vendors/new" element={<VendorFormPage mode="add" />} />
           <Route path="/admin/vendors/:vendorId/edit" element={<VendorFormPage mode="edit" />} />
