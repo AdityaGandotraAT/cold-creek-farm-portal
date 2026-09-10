@@ -1,0 +1,17 @@
+{
+  "name": "cold-creek-farm-portal",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "npm install --prefix frontend --include=dev && npm run build --prefix frontend && npm install --prefix backend",
+    "start": "node backend/server.js",
+    "migrate": "npm run migrate --prefix backend",
+    "seed:auth": "npm run seed:auth --prefix backend",
+    "vercel-install": "npm install --prefix frontend --include=dev && npm install --prefix backend",
+    "vercel-build": "npm run build --prefix frontend"
+  }
+}
