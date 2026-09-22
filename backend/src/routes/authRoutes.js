@@ -3,6 +3,7 @@ import {
   getAdminCheck,
   getClientCheck,
   getMe,
+  postChangePassword,
   postLogin,
 } from '../controllers/authController.js';
 import { authenticate } from '../middleware/authenticate.js';
@@ -12,6 +13,7 @@ const router = Router();
 
 router.post('/login', postLogin);
 router.get('/me', authenticate, getMe);
+router.post('/change-password', authenticate, postChangePassword);
 router.get('/admin', authenticate, requireAdmin, getAdminCheck);
 router.get('/client', authenticate, requireClient, getClientCheck);
 

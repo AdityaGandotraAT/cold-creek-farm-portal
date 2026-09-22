@@ -8,7 +8,9 @@
     "dev": "node --watch server.js",
     "migrate": "node scripts/migrate.js",
     "seed:auth": "node scripts/seed-auth-users.js",
-    "test": "node --test test/auth.test.js"
+    "seed:clients": "node scripts/seed-clients.js",
+    "seed:bookings": "node scripts/seed-bookings.js",
+    "test": "node --test test/auth.test.js test/clients.test.js test/bookings.test.js test/clientOnboarding.test.js test/clientPortal.test.js test/bookingEmail.test.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -16,6 +18,7 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
+    "nodemailer": "^10.0.10",
     "pg": "^8.23.0"
   },
   "devDependencies": {

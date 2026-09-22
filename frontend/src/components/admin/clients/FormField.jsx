@@ -15,6 +15,7 @@ function FormField({
   min,
   max,
   step,
+  readOnly = false,
 }) {
   const describedBy = error ? `${id}-error` : undefined;
   const controlProps = {
@@ -24,19 +25,24 @@ function FormField({
     onChange: (event) => onChange(event.target.value),
     'aria-invalid': error ? 'true' : 'false',
     'aria-describedby': describedBy,
+    readOnly: readOnly || undefined,
   };
 
   let control;
 
   if (options) {
     control = (
-      <select {...controlProps}>
+      <select {...controlProps} disabled={readOnly || undefined}>
         <option value="">{placeholder || 'Select'}</option>
-        {options.map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
+        {options.map((option) => {
+          const optionValue = typeof option === 'object' ? option.value : option;
+          const optionLabel = typeof option === 'object' ? option.label : option;
+          return (
+            <option key={optionValue} value={optionValue}>
+              {optionLabel}
+            </option>
+          );
+        })}
       </select>
     );
   } else if (type === 'textarea') {
@@ -63,7 +69,9 @@ function FormField({
   }
 
   return (
-    <div className={`client-form__field${wide ? ' is-wide' : ''}${error ? ' is-invalid' : ''}`}>
+    <div
+      className={`client-form__field${wide ? ' is-wide' : ''}${error ? ' is-invalid' : ''}${readOnly ? ' is-readonly' : ''}`}
+    >
       <label htmlFor={id}>
         {label}
         {required ? <span aria-hidden="true"> *</span> : null}

@@ -19,6 +19,9 @@ function RecentActivity({ items }) {
         </div>
       </div>
 
+      {items.length === 0 ? (
+        <p className="dashboard-empty">No booking activity yet.</p>
+      ) : (
       <ol className="dashboard-activity">
         {items.map((item) => {
           const meta = typeMeta[item.type] || { label: 'Update', icon: 'clock' };
@@ -37,6 +40,7 @@ function RecentActivity({ items }) {
           );
         })}
       </ol>
+      )}
     </section>
   );
 }

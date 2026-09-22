@@ -34,6 +34,13 @@ Copy `backend/.env.example` to `backend/.env` (if needed) and set:
 - `JWT_SECRET`
 - `JWT_EXPIRES_IN`
 - `JWT_REMEMBER_EXPIRES_IN`
+- `PORTAL_URL`
+- `SMTP_HOST`
+- `SMTP_PORT`
+- `SMTP_USER`
+- `SMTP_PASSWORD`
+- `SMTP_SECURE`
+- `SMTP_FROM`
 
 ## Authentication users
 
@@ -43,7 +50,13 @@ The minimum authentication table is created by:
 database/migrations/001_create_users.sql
 ```
 
-Apply it from the backend folder:
+Client portal account linking + `must_change_password` is added by:
+
+```
+database/migrations/004_client_portal_accounts.sql
+```
+
+Apply migrations from the repo root:
 
 ```
 npm run migrate
@@ -51,6 +64,5 @@ npm run seed:auth
 ```
 
 That creates local test users only. Passwords are hashed before they are stored.
-
 
 `backend/.env` is gitignored and must not be committed.

@@ -1,51 +1,61 @@
-import { useState } from 'react'
-import { Navigate, useNavigate } from 'react-router-dom'
-import { loginRequest } from '../api/auth.js'
-import { getSession, saveSession } from '../auth/session.js'
-import logo from '../assets/ccf-logo.png'
-import venuePhoto from '../assets/login-venue.webp'
-import LoginForm from '../components/LoginForm.jsx'
-import './LoginPage.css'
+import { useState } from 'react';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { loginRequest } from '../api/auth.js';
+import { getSession, saveSession } from '../auth/session.js';
+import logo from '../assets/ccf-logo.png';
+import venuePhoto from '../assets/login-venue.webp';
+import LoginForm from '../components/LoginForm.jsx';
+import './LoginPage.css';
+
+function destinationForUser(user) {
+  if (user?.mustChangePassword) {
+    return '/change-password';
+  }
+  if (user?.role === 'ADMIN') {
+    return '/admin/dashboard';
+  }
+  if (user?.role === 'CLIENT') {
+    return '/client/dashboard';
+  }
+  return '/';
+}
 
 function LoginPage() {
-  const navigate = useNavigate()
-  const existingSession = getSession()
-  const [notice, setNotice] = useState('')
-  const [noticeTone, setNoticeTone] = useState('info')
-  const [authenticatedRole, setAuthenticatedRole] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const navigate = useNavigate();
+  const existingSession = getSession();
+  const [notice, setNotice] = useState('');
+  const [noticeTone, setNoticeTone] = useState('info');
+  const [authenticatedRole, setAuthenticatedRole] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  if (existingSession?.user?.role === 'ADMIN') {
-    return <Navigate to="/admin/dashboard" replace />
+  if (existingSession?.token && existingSession?.user) {
+    return <Navigate to={destinationForUser(existingSession.user)} replace />;
   }
 
   async function handleSubmit({ email, password, rememberMe }) {
-    setNotice('')
-    setAuthenticatedRole('')
-    setIsSubmitting(true)
+    setNotice('');
+    setAuthenticatedRole('');
+    setIsSubmitting(true);
 
     try {
-      const result = await loginRequest({ email, password, rememberMe })
-      saveSession(result.token, result.user, rememberMe)
-      setNotice('Login successful')
-      setNoticeTone('success')
-      setAuthenticatedRole(result.user.role)
-
-      if (result.user.role === 'ADMIN') {
-        navigate('/admin/dashboard', { replace: true })
-      }
+      const result = await loginRequest({ email, password, rememberMe });
+      saveSession(result.token, result.user, rememberMe);
+      setNotice('Login successful');
+      setNoticeTone('success');
+      setAuthenticatedRole(result.user.role);
+      navigate(destinationForUser(result.user), { replace: true });
     } catch (err) {
-      setNotice(err.message)
-      setNoticeTone('error')
+      setNotice(err.message);
+      setNoticeTone('error');
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 
   function handleForgotPassword() {
-    setAuthenticatedRole('')
-    setNoticeTone('info')
-    setNotice('Password reset is not connected yet.')
+    setAuthenticatedRole('');
+    setNoticeTone('info');
+    setNotice('Password reset is not connected yet.');
   }
 
   return (
@@ -79,7 +89,7 @@ function LoginPage() {
         </div>
       </section>
     </main>
-  )
+  );
 }
 
-export default LoginPage
+export default LoginPage;

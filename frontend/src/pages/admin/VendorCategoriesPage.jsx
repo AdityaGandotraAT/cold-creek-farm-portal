@@ -8,22 +8,28 @@ import '../../components/admin/clients/clients.css';
 import CategoryTable from '../../components/admin/vendor-categories/CategoryTable.jsx';
 import '../../components/admin/vendor-categories/vendorCategories.css';
 import { vendorStatusOptions } from '../../data/vendorsMock.js';
+import { withVendorCounts } from '../../data/vendorCategoriesMock.js';
 import {
-  vendorCategoryRecords,
-  withVendorCounts,
-} from '../../data/vendorCategoriesMock.js';
+  getVendorCategories,
+  subscribeVendorCategories,
+} from '../../data/vendorCategoriesStore.js';
 import { getVendors, subscribeVendors } from '../../data/vendorsStore.js';
 
 function VendorCategoriesPage() {
   const navigate = useNavigate();
+  const categoryRecords = useSyncExternalStore(
+    subscribeVendorCategories,
+    getVendorCategories,
+    getVendorCategories,
+  );
   const vendors = useSyncExternalStore(subscribeVendors, getVendors, getVendors);
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('');
   const normalizedQuery = query.trim().toLowerCase();
 
   const categories = useMemo(
-    () => withVendorCounts(vendorCategoryRecords, vendors),
-    [vendors],
+    () => withVendorCounts(categoryRecords, vendors),
+    [categoryRecords, vendors],
   );
 
   const visibleCategories = useMemo(

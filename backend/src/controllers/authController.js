@@ -1,4 +1,4 @@
-import { login } from '../services/authService.js';
+import { changePassword, login } from '../services/authService.js';
 import { toPublicUser } from '../utils/toPublicUser.js';
 
 export async function postLogin(req, res, next) {
@@ -22,6 +22,21 @@ export function getMe(req, res) {
     status: 'ok',
     user: toPublicUser(req.user),
   });
+}
+
+export async function postChangePassword(req, res, next) {
+  try {
+    const { currentPassword, newPassword } = req.body || {};
+    const user = await changePassword(req.user.id, { currentPassword, newPassword });
+
+    res.status(200).json({
+      status: 'ok',
+      message: 'Password updated',
+      user,
+    });
+  } catch (err) {
+    next(err);
+  }
 }
 
 export function getAdminCheck(req, res) {

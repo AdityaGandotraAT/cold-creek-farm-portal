@@ -13,6 +13,7 @@ const links = [
     children: [
       { to: '/admin/vendors', label: 'All Vendors' },
       { to: '/admin/vendor-categories', label: 'Categories' },
+      { to: '/admin/vendor-selections', label: 'Selections' },
     ],
   },
   { to: '/admin/notifications', label: 'Notifications', icon: 'notifications' },
@@ -20,7 +21,11 @@ const links = [
 ];
 
 function isVendorPath(pathname) {
-  return pathname.startsWith('/admin/vendors') || pathname.startsWith('/admin/vendor-categories');
+  return (
+    pathname.startsWith('/admin/vendors') ||
+    pathname.startsWith('/admin/vendor-categories') ||
+    pathname.startsWith('/admin/vendor-selections')
+  );
 }
 
 function AdminSidebar({ collapsed, hidden, onLogout }) {

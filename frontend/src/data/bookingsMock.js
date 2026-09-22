@@ -11,103 +11,16 @@ export const vendorCategories = [
 
 export const bookingStatusOptions = ['Confirmed', 'Pending'];
 
-export const venueOptions = ['The Barn', 'Farmhouse Lawn', 'Creek Pavilion', 'Cold Creek Farm'];
-
-export const seedBookings = [
-  {
-    id: 'bkg-1001',
-    name: 'Sarah Bennett',
-    referenceNumber: 'CCF-2026-001',
-    eventDate: '2026-10-18',
-    eventStartTime: '17:00',
-    eventEndTime: '23:00',
-    venue: 'Cold Creek Farm',
-    guests: 150,
-    bookingStatus: 'Confirmed',
-    selectedCount: 4,
-  },
-  {
-    id: 'bkg-1008',
-    name: 'Cole Bennett',
-    referenceNumber: 'CCF-2026-1008',
-    eventDate: '2026-10-11',
-    eventStartTime: '16:00',
-    eventEndTime: '22:00',
-    venue: 'The Barn',
-    guests: 165,
-    bookingStatus: 'Confirmed',
-    selectedCount: 5,
-  },
-  {
-    id: 'bkg-1012',
-    name: 'Amelia Whitaker',
-    referenceNumber: 'CCF-2026-1012',
-    eventDate: '2026-10-24',
-    eventStartTime: '17:30',
-    eventEndTime: '23:00',
-    venue: 'Farmhouse Lawn',
-    guests: 120,
-    bookingStatus: 'Confirmed',
-    selectedCount: 6,
-  },
-  {
-    id: 'bkg-1015',
-    name: 'Mateo Ruiz',
-    referenceNumber: 'CCF-2026-1015',
-    eventDate: '2026-11-07',
-    eventStartTime: '15:00',
-    eventEndTime: '21:00',
-    venue: 'The Barn',
-    guests: 180,
-    bookingStatus: 'Confirmed',
-    selectedCount: 4,
-  },
-  {
-    id: 'bkg-1019',
-    name: 'Claire Ellison',
-    referenceNumber: 'CCF-2026-1019',
-    eventDate: '2026-11-21',
-    eventStartTime: '16:30',
-    eventEndTime: '22:30',
-    venue: 'Creek Pavilion',
-    guests: 95,
-    bookingStatus: 'Pending',
-    selectedCount: 2,
-  },
-  {
-    id: 'bkg-1024',
-    name: 'Sophia Grant',
-    referenceNumber: 'CCF-2026-1024',
-    eventDate: '2026-12-05',
-    eventStartTime: '17:00',
-    eventEndTime: '23:00',
-    venue: 'The Barn',
-    guests: 148,
-    bookingStatus: 'Confirmed',
-    selectedCount: 3,
-  },
-  {
-    id: 'bkg-1028',
-    name: 'Avery Hale',
-    referenceNumber: 'CCF-2026-1028',
-    eventDate: '2026-12-19',
-    eventStartTime: '16:00',
-    eventEndTime: '22:00',
-    venue: 'Farmhouse Lawn',
-    guests: 110,
-    bookingStatus: 'Pending',
-    selectedCount: 1,
-  },
-  {
-    id: 'bkg-1031',
-    name: 'Maya Patel',
-    referenceNumber: 'CCF-2027-1031',
-    eventDate: '2027-03-14',
-    eventStartTime: '17:00',
-    eventEndTime: '23:30',
-    venue: 'Cold Creek Farm',
-    guests: 200,
-    bookingStatus: 'Confirmed',
-    selectedCount: 6,
-  },
+export const eventTypeOptions = [
+  'Wedding',
+  'Rehearsal Dinner',
+  'Reception',
+  'Private Event',
+  'Other',
 ];
+
+export const DEFAULT_VENUE = 'Cold Creek Farm';
+
+export const venueOptions = [DEFAULT_VENUE];
+
+export const seedBookings = [];

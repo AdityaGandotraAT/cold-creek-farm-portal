@@ -6,5 +6,6 @@ export function toPublicUser(user) {
     email: user.email,
     role: user.role,
     status: user.status,
+    mustChangePassword: Boolean(user.must_change_password),
   };
 }

@@ -1,0 +1,479 @@
+/* Client-only extras on top of shared admin-shell chrome */
+
+.client-shell {
+  --client-forest: var(--portal-forest);
+  --client-leaf: var(--portal-leaf);
+  --client-bronze: var(--portal-bronze);
+  --client-mist: var(--portal-mist);
+}
+
+.client-shell .admin-sidebar__brand {
+  gap: 6px;
+  padding: 6px 8px 14px;
+}
+
+.client-shell .admin-sidebar__product {
+  font-size: 0.92rem;
+}
+
+/* Dashboard welcome — first impression after login (photo OK here only) */
+.client-welcome {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  max-width: 1080px;
+  animation: client-welcome-in 0.55s ease both;
+}
+
+@keyframes client-welcome-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .client-welcome,
+  .client-booking,
+  .client-stub {
+    animation: none;
+  }
+}
+
+.client-welcome__hero {
+  position: relative;
+  overflow: hidden;
+  min-height: clamp(220px, 32vw, 300px);
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--client-bronze) 25%, var(--color-border));
+  box-shadow: 0 16px 40px rgba(36, 48, 40, 0.1);
+}
+
+.client-welcome__hero-photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 42%;
+  transform: scale(1.02);
+}
+
+.client-welcome__hero-veil {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      115deg,
+      rgba(24, 32, 28, 0.78) 0%,
+      rgba(24, 32, 28, 0.42) 48%,
+      rgba(24, 32, 28, 0.18) 100%
+    );
+}
+
+.client-welcome__hero-copy {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 8px;
+  min-height: inherit;
+  padding: clamp(20px, 4vw, 36px);
+  color: #f7f4ef;
+}
+
+.client-welcome__eyebrow {
+  margin: 0;
+  font-size: 0.74rem;
+  font-weight: 650;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--client-bronze) 75%, #fff);
+}
+
+.client-welcome__hero-copy h2 {
+  margin: 0;
+  max-width: 16ch;
+  font-family: var(--font-serif);
+  font-size: clamp(1.7rem, 3.4vw, 2.45rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.client-welcome__hero-copy p {
+  margin: 0;
+  max-width: 34rem;
+  color: rgba(247, 244, 239, 0.86);
+  font-size: 1rem;
+  line-height: 1.45;
+}
+
+.client-welcome__event {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 6px 12px;
+  width: fit-content;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  font-size: 0.84rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.client-welcome__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.client-welcome__card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 18px 16px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
+  border-radius: 16px;
+  background:
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--color-surface) 98%, #fff) 0%,
+      color-mix(in srgb, var(--client-mist) 45%, var(--color-surface)) 100%
+    );
+  box-shadow:
+    0 1px 0 color-mix(in srgb, #fff 40%, transparent) inset,
+    0 10px 28px rgba(36, 48, 40, 0.05);
+  text-decoration: none;
+  color: inherit;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.client-welcome__card:hover {
+  border-color: color-mix(in srgb, var(--client-bronze) 45%, var(--color-border));
+  box-shadow: 0 14px 32px rgba(36, 48, 40, 0.09);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .client-welcome__card:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.client-welcome__card-label {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.client-welcome__card-value {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.28rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--client-forest);
+}
+
+.client-shell[data-theme='dark'] .client-welcome__card-value {
+  color: var(--color-text);
+}
+
+.client-welcome__card-hint {
+  margin: auto 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.86rem;
+}
+
+.client-welcome__strip {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--client-bronze) 30%, var(--color-border));
+  background:
+    linear-gradient(
+      100deg,
+      color-mix(in srgb, var(--client-bronze) 12%, var(--color-surface)) 0%,
+      var(--color-surface) 55%
+    );
+}
+
+.client-welcome__strip p {
+  margin: 0;
+  max-width: 40rem;
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+}
+
+.client-welcome__strip strong {
+  color: var(--color-text);
+  font-weight: 650;
+}
+
+.client-welcome__cta {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: none;
+  background: var(--client-leaf);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.client-welcome__cta:hover {
+  filter: brightness(1.06);
+}
+
+.client-shell[data-theme='dark'] .client-welcome__cta {
+  background: var(--client-bronze);
+  color: #243028;
+}
+
+.client-booking {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  max-width: 1080px;
+  animation: client-welcome-in 0.45s ease both;
+}
+
+.client-booking__intro {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.client-booking__intro h2 {
+  margin: 0 0 8px;
+  font-family: var(--font-serif);
+  font-size: clamp(1.55rem, 2.6vw, 2rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.client-booking__intro p:last-child {
+  margin: 0;
+  max-width: 38rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+.client-booking__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px 20px 18px;
+  border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
+  border-radius: 16px;
+  background:
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--color-surface) 98%, #fff) 0%,
+      color-mix(in srgb, var(--client-mist) 45%, var(--color-surface)) 100%
+    );
+  box-shadow:
+    0 1px 0 color-mix(in srgb, #fff 40%, transparent) inset,
+    0 10px 28px rgba(36, 48, 40, 0.05);
+}
+
+.client-booking__panel h3 {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.18rem;
+  font-weight: 600;
+}
+
+.client-booking__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 24px;
+  margin: 0;
+}
+
+.client-booking__facts dt {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.client-booking__facts dd {
+  margin: 4px 0 0;
+  font-size: 1.02rem;
+  font-weight: 550;
+  line-height: 1.35;
+}
+
+.client-booking__notes {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 0.98rem;
+  line-height: 1.55;
+}
+
+.client-stub {
+  max-width: 36rem;
+  padding: 28px 8px;
+  animation: client-welcome-in 0.45s ease both;
+}
+
+.client-stub__kicker {
+  margin: 0 0 8px;
+  color: var(--client-bronze);
+  font-size: 0.74rem;
+  font-weight: 650;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.client-stub h2 {
+  margin: 0 0 10px;
+  font-family: var(--font-serif);
+  font-size: clamp(1.5rem, 2.5vw, 1.9rem);
+  font-weight: 600;
+}
+
+.client-stub p {
+  margin: 0;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+  .client-welcome__grid,
+  .client-booking__facts {
+    grid-template-columns: 1fr;
+  }
+
+  .client-welcome__hero {
+    min-height: 240px;
+  }
+}
+
+@media (max-width: 640px) {
+  .client-welcome__strip {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+.client-vendors__notice {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--client-leaf) 35%, var(--color-border));
+  background: color-mix(in srgb, var(--client-leaf) 10%, var(--color-surface));
+  color: var(--color-text);
+  font-size: 0.92rem;
+}
+
+.client-vendors__lock {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--client-bronze) 28%, var(--color-border));
+  background: color-mix(in srgb, var(--client-bronze) 8%, var(--color-surface));
+  color: var(--color-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.client-vendors__lock.is-locked {
+  border-color: color-mix(in srgb, var(--color-text-muted) 35%, var(--color-border));
+  background: color-mix(in srgb, var(--color-text-muted) 8%, var(--color-surface));
+}
+
+.client-vendors__list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.client-vendors__card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.client-vendors__card-head h3 {
+  margin: 0 0 4px;
+}
+
+.client-vendors__card-head p {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.88rem;
+}
+
+.client-vendors__label {
+  margin: 4px 0 0;
+  color: var(--color-text-muted);
+  font-size: 0.72rem;
+  font-weight: 650;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.client-vendors__select {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  font: inherit;
+}
+
+.client-vendors__select:disabled {
+  opacity: 0.7;
+}
+
+.client-vendors__saving,
+.client-vendors__empty {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.client-vendors__facts {
+  margin-top: 4px;
+}
+
+.client-vendors__facts a {
+  color: var(--client-leaf);
+  text-decoration: none;
+}
+
+.client-vendors__facts a:hover {
+  text-decoration: underline;
+}

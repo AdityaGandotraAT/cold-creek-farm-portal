@@ -11,6 +11,9 @@ function AttentionList({ items }) {
         </div>
       </div>
 
+      {items.length === 0 ? (
+        <p className="dashboard-empty">Nothing needs follow-up right now.</p>
+      ) : (
       <ul className="dashboard-attention">
         {items.map((item) => (
           <li
@@ -32,6 +35,7 @@ function AttentionList({ items }) {
           </li>
         ))}
       </ul>
+      )}
     </section>
   );
 }

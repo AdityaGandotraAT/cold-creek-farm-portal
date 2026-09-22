@@ -44,3 +44,22 @@ export function updateVendor(id, payload) {
   emit();
   return vendor;
 }
+
+export function renameVendorCategory(oldName, newName) {
+  if (!oldName || !newName || oldName === newName) {
+    return;
+  }
+
+  let changed = false;
+  vendors = vendors.map((vendor) => {
+    if (vendor.category !== oldName) {
+      return vendor;
+    }
+    changed = true;
+    return { ...vendor, category: newName };
+  });
+
+  if (changed) {
+    emit();
+  }
+}

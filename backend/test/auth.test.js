@@ -9,19 +9,19 @@ async function login(email, password) {
 }
 
 test('successful Admin login', async () => {
-  const res = await login('admin@ccf.local', 'CcfAdmin123!');
+  const res = await login('admin@coldcreekfarm.com', 'CcfAdmin123!');
 
   assert.equal(res.status, 200);
   assert.equal(res.body.status, 'ok');
   assert.equal(res.body.user.role, 'ADMIN');
-  assert.equal(res.body.user.email, 'admin@ccf.local');
+  assert.equal(res.body.user.email, 'admin@coldcreekfarm.com');
   assert.ok(res.body.token);
   assert.equal(res.body.user.password_hash, undefined);
   assert.equal(res.body.password_hash, undefined);
 });
 
 test('successful Client login', async () => {
-  const res = await login('client@ccf.local', 'CcfClient123!');
+  const res = await login('client@coldcreekfarm.com', 'CcfClient123!');
 
   assert.equal(res.status, 200);
   assert.equal(res.body.user.role, 'CLIENT');
@@ -30,7 +30,7 @@ test('successful Client login', async () => {
 });
 
 test('incorrect password', async () => {
-  const res = await login('admin@ccf.local', 'wrong-password');
+  const res = await login('admin@coldcreekfarm.com', 'wrong-password');
 
   assert.equal(res.status, 401);
   assert.equal(res.body.message, 'Invalid email or password');
@@ -44,7 +44,7 @@ test('unknown email', async () => {
 });
 
 test('inactive user', async () => {
-  const res = await login('inactive@ccf.local', 'CcfInactive123!');
+  const res = await login('inactive@coldcreekfarm.com', 'CcfInactive123!');
 
   assert.equal(res.status, 403);
   assert.equal(res.body.message, 'Account is inactive');
@@ -54,7 +54,7 @@ test('missing login fields', async () => {
   const missingBoth = await request(app).post('/api/auth/login').send({});
   const missingPassword = await request(app)
     .post('/api/auth/login')
-    .send({ email: 'admin@ccf.local' });
+    .send({ email: 'admin@coldcreekfarm.com' });
   const invalidEmail = await request(app)
     .post('/api/auth/login')
     .send({ email: 'not-an-email', password: 'CcfAdmin123!' });
@@ -77,8 +77,8 @@ test('invalid authentication token', async () => {
 });
 
 test('role authorization', async () => {
-  const adminLogin = await login('admin@ccf.local', 'CcfAdmin123!');
-  const clientLogin = await login('client@ccf.local', 'CcfClient123!');
+  const adminLogin = await login('admin@coldcreekfarm.com', 'CcfAdmin123!');
+  const clientLogin = await login('client@coldcreekfarm.com', 'CcfClient123!');
 
   const adminOk = await request(app)
     .get('/api/auth/admin')
@@ -102,7 +102,7 @@ test('role authorization', async () => {
 });
 
 test('authenticated me uses database role', async () => {
-  const adminLogin = await login('admin@ccf.local', 'CcfAdmin123!');
+  const adminLogin = await login('admin@coldcreekfarm.com', 'CcfAdmin123!');
   const me = await request(app)
     .get('/api/auth/me')
     .set('Authorization', `Bearer ${adminLogin.body.token}`);

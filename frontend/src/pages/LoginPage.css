@@ -7,6 +7,7 @@
   min-height: 100dvh;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 1fr);
+  background: #fff;
   font-family: 'Source Sans 3', var(--font-sans);
 }
 
@@ -15,6 +16,7 @@
   min-height: 100%;
   overflow: hidden;
   color: #fff;
+  background: #243028;
 }
 
 @media (min-width: 961px) {
@@ -125,6 +127,20 @@
   font-weight: 400;
   letter-spacing: 0.01em;
   line-height: 1.5;
+}
+
+.login-page__signed-in {
+  margin: -18px 0 22px;
+  color: var(--login-green);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.login-page__hint {
+  margin: -6px 0 0;
+  color: var(--login-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
 }
 
 @media (max-width: 960px) {

@@ -26,6 +26,7 @@ function BookingTable({ bookings, onView, onEdit }) {
         <table className="clients-table bookings-table">
           <thead>
             <tr>
+              <th>Event Name</th>
               <th>Name</th>
               <th>Booking/Reference Number</th>
               <th>Event Date</th>
@@ -55,7 +56,8 @@ function BookingTable({ bookings, onView, onEdit }) {
           <li key={booking.id} className="clients-card">
             <div className="clients-card__top">
               <div>
-                <strong>{booking.name}</strong>
+                <strong>{booking.eventName || booking.name}</strong>
+                <div className="clients-table__ref">{booking.name}</div>
                 <div className="clients-table__ref">{booking.referenceNumber}</div>
               </div>
               <StatusBadge tone={bookingStatusTone(booking.bookingStatus)}>

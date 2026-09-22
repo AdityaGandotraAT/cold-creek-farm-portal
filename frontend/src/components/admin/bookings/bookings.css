@@ -42,6 +42,12 @@
   font-size: 0.88rem;
 }
 
+.client-form__field.is-readonly input {
+  background: var(--color-panel);
+  color: var(--color-text);
+  cursor: default;
+}
+
 .booking-summary h3,
 .booking-selections h3 {
   margin: 0 0 6px;
@@ -65,6 +71,26 @@
 
 .booking-summary__grid dd {
   margin: 4px 0 0;
+}
+
+.booking-summary__notes {
+  margin: 18px 0 0;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.booking-summary__notes h4 {
+  margin: 0 0 6px;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.booking-summary__notes p {
+  margin: 0;
+  line-height: 1.5;
 }
 
 .booking-lock {

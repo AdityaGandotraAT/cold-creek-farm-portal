@@ -1,10 +1,26 @@
-import { useState } from 'react';
+import { useMemo, useState, useSyncExternalStore } from 'react';
 import FormField from '../clients/FormField.jsx';
-import { vendorCategories } from '../../../data/vendorsMock.js';
+import {
+  getVendorCategories,
+  getVendorCategoryNames,
+  subscribeVendorCategories,
+} from '../../../data/vendorCategoriesStore.js';
 import { emptyVendorForm, toVendorPayload, validateVendorForm } from './vendorForm.js';
 import './vendors.css';
 
 function VendorForm({ initialValues = emptyVendorForm, submitLabel = 'Save', onSubmit, onCancel }) {
+  const categories = useSyncExternalStore(
+    subscribeVendorCategories,
+    getVendorCategories,
+    getVendorCategories,
+  );
+  const categoryOptions = useMemo(() => {
+    const active = getVendorCategoryNames();
+    if (initialValues.category && !active.includes(initialValues.category)) {
+      return [initialValues.category, ...active];
+    }
+    return active;
+  }, [categories, initialValues.category]);
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,7 +72,7 @@ function VendorForm({ initialValues = emptyVendorForm, submitLabel = 'Save', onS
             onChange={(value) => updateField('category', value)}
             error={errors.category}
             required
-            options={vendorCategories}
+            options={categoryOptions}
             placeholder="Select a category"
           />
           <FormField

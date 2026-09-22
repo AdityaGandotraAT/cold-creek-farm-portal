@@ -1,14 +1,20 @@
-import { bookingStatusOptions, venueOptions } from '../../../data/bookingsMock.js';
+import { bookingStatusOptions, DEFAULT_VENUE, eventTypeOptions } from '../../../data/bookingsMock.js';
 import { isFarmISODate } from '../../../data/farmTime.js';
 
+export { DEFAULT_VENUE };
+
 export const emptyBookingForm = {
+  clientId: '',
   name: '',
+  eventName: '',
+  eventType: 'Wedding',
   eventDate: '',
   eventStartTime: '',
   eventEndTime: '',
-  venue: '',
+  venue: DEFAULT_VENUE,
   guests: '',
   bookingStatus: 'Pending',
+  notes: '',
 };
 
 function normalizeTime(value) {
@@ -32,21 +38,33 @@ function timeToMinutes(value) {
 
 export function bookingToForm(booking) {
   return {
+    clientId: booking.clientId || '',
     name: booking.name || '',
+    eventName: booking.eventName || '',
+    eventType: booking.eventType || '',
     eventDate: booking.eventDate || '',
     eventStartTime: normalizeTime(booking.eventStartTime),
     eventEndTime: normalizeTime(booking.eventEndTime),
-    venue: booking.venue || '',
+    venue: DEFAULT_VENUE,
     guests: booking.guests == null ? '' : String(booking.guests),
     bookingStatus: booking.bookingStatus || 'Pending',
+    notes: booking.notes || '',
   };
 }
 
 export function validateBookingForm(values) {
   const errors = {};
 
+  if (!values.clientId) {
+    errors.clientId = 'Select a client so they can see this booking.';
+  }
+
   if (!values.name.trim()) {
     errors.name = 'Enter a name.';
+  }
+
+  if (!String(values.eventName || '').trim()) {
+    errors.eventName = 'Enter the event name.';
   }
 
   if (!values.eventDate) {
@@ -70,17 +88,15 @@ export function validateBookingForm(values) {
     errors.eventEndTime = 'End time must be after start time.';
   }
 
-  if (!values.venue) {
-    errors.venue = 'Select a venue.';
-  } else if (!venueOptions.includes(values.venue)) {
-    errors.venue = 'Select a venue.';
-  }
-
   const guestsRaw = String(values.guests || '').trim();
   if (!guestsRaw) {
     errors.guests = 'Enter the guest count.';
   } else if (!/^\d+$/.test(guestsRaw) || Number(guestsRaw) < 1) {
     errors.guests = 'Enter a guest count of at least 1.';
+  }
+
+  if (values.eventType && !eventTypeOptions.includes(values.eventType)) {
+    errors.eventType = 'Select an event type.';
   }
 
   if (!values.bookingStatus) {
@@ -94,12 +110,16 @@ export function validateBookingForm(values) {
 
 export function toBookingPayload(values) {
   return {
+    clientId: String(values.clientId || '').trim() || null,
     name: values.name.trim(),
+    eventName: String(values.eventName || '').trim(),
+    eventType: String(values.eventType || '').trim() || null,
     eventDate: values.eventDate,
     eventStartTime: normalizeTime(values.eventStartTime),
     eventEndTime: normalizeTime(values.eventEndTime),
-    venue: values.venue,
+    venue: DEFAULT_VENUE,
     guests: Number(String(values.guests).trim()),
     bookingStatus: values.bookingStatus,
+    notes: String(values.notes || '').trim() || null,
   };
 }

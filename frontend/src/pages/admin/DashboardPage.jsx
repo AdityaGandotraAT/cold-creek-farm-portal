@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useSyncExternalStore } from 'react';
 import { Link } from 'react-router-dom';
 import { getSession } from '../../auth/session.js';
 import AttentionList from '../../components/admin/dashboard/AttentionList.jsx';
@@ -6,13 +7,9 @@ import RecentActivity from '../../components/admin/dashboard/RecentActivity.jsx'
 import UpcomingEvents from '../../components/admin/dashboard/UpcomingEvents.jsx';
 import VendorSelectionOverview from '../../components/admin/dashboard/VendorSelectionOverview.jsx';
 import '../../components/admin/dashboard/dashboard.css';
-import {
-  attentionItems,
-  dashboardSummary,
-  recentActivity,
-  upcomingEvents,
-  vendorCategoryOverview,
-} from '../../data/dashboardMock.js';
+import { getBookingsState, loadBookings, subscribeBookings } from '../../data/bookingsStore.js';
+import { getClientsState, loadClients, subscribeClients } from '../../data/clientsStore.js';
+import { dashboardFromRecords } from '../../data/dashboardFromRecords.js';
 import { farmHour, formatFarmToday } from '../../data/farmTime.js';
 
 function greetingForHour(hour) {
@@ -32,16 +29,42 @@ function DashboardPage() {
   const firstName = session?.user?.firstName;
   const greetingName = !firstName || firstName === 'Portal' ? 'Admin' : firstName;
   const today = formatFarmToday();
+  const { bookings, loading: bookingsLoading, error: bookingsError } = useSyncExternalStore(
+    subscribeBookings,
+    getBookingsState,
+    getBookingsState,
+  );
+  const { clients, loading: clientsLoading, error: clientsError } = useSyncExternalStore(
+    subscribeClients,
+    getClientsState,
+    getClientsState,
+  );
+
+  useEffect(() => {
+    loadBookings();
+    loadClients();
+  }, []);
+
+  const {
+    dashboardSummary,
+    upcomingEvents,
+    vendorCategoryOverview,
+    attentionItems,
+    recentActivity,
+  } = useMemo(() => dashboardFromRecords({ bookings, clients }), [bookings, clients]);
+
+  const loading = bookingsLoading || clientsLoading;
+  const error = bookingsError || clientsError;
 
   return (
     <div className="dashboard">
       <header className="dashboard__intro">
         <div>
-          <p className="dashboard__kicker">{today}</p>
+          <p className="dashboard__kicker">Cold Creek Farm · Admin · {today}</p>
           <h2>
             {greetingForHour(farmHour())}, {greetingName}.
           </h2>
-          <p>A snapshot of Cold Creek Farm clients, bookings, and vendor follow-up.</p>
+          <p>A snapshot of clients, bookings, and vendor follow-up.</p>
         </div>
         <div className="dashboard__shortcuts">
           <Link className="dashboard__shortcut" to="/admin/clients">
@@ -55,6 +78,13 @@ function DashboardPage() {
           </Link>
         </div>
       </header>
+
+      {error ? (
+        <p className="dashboard-empty" role="alert">
+          {error}
+        </p>
+      ) : null}
+      {loading ? <p className="dashboard-empty">Loading current records…</p> : null}
 
       <section className="dashboard__cards" aria-label="Summary">
         {dashboardSummary.map((card) => (

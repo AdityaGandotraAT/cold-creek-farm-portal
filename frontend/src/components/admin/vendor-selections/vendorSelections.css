@@ -1,0 +1,23 @@
+.selections-table {
+  min-width: 960px;
+}
+
+.selections-toolbar {
+  grid-template-columns: minmax(0, 1.5fr) minmax(150px, 0.7fr) minmax(130px, 0.55fr);
+}
+
+.selections-note {
+  margin-bottom: 0;
+}
+
+.selections-loading {
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
+.categories-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}

@@ -2,31 +2,40 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import PageHeader from '../../components/admin/clients/PageHeader.jsx';
 import '../../components/admin/clients/addClient.css';
 import '../../components/admin/clients/clients.css';
+import CategoryForm from '../../components/admin/vendor-categories/CategoryForm.jsx';
+import {
+  categoryToForm,
+  emptyCategoryForm,
+} from '../../components/admin/vendor-categories/categoryForm.js';
 import '../../components/admin/vendor-categories/vendorCategories.css';
-import { getVendorCategoryById } from '../../data/vendorCategoriesMock.js';
-
-const copy = {
-  add: {
-    title: 'Add Category',
-    description: 'Add an optional vendor category for future Cold Creek Farm events.',
-    message:
-      'Category creation will be implemented here. The six required CCF categories will not be changed.',
-  },
-  edit: {
-    title: 'Edit Category',
-    description: 'Update this vendor category.',
-    message: 'Category editing will be implemented here.',
-  },
-};
+import {
+  addVendorCategory,
+  getVendorCategoryById,
+  updateVendorCategory,
+} from '../../data/vendorCategoriesStore.js';
 
 function VendorCategoryFormPage({ mode }) {
   const navigate = useNavigate();
   const { categoryId } = useParams();
-  const category = mode === 'edit' ? getVendorCategoryById(categoryId) : null;
-  const page = copy[mode];
-  const title = category ? `${page.title}: ${category.name}` : page.title;
+  const isEdit = mode === 'edit';
+  const category = isEdit ? getVendorCategoryById(categoryId) : null;
 
-  if (mode === 'edit' && !category) {
+  function handleCancel() {
+    navigate(isEdit && category ? `/admin/vendor-categories/${category.id}` : '/admin/vendor-categories');
+  }
+
+  function handleSubmit(payload) {
+    if (isEdit && category) {
+      const updated = updateVendorCategory(category.id, payload);
+      navigate(`/admin/vendor-categories/${updated.id}`);
+      return;
+    }
+
+    const created = addVendorCategory(payload);
+    navigate(`/admin/vendor-categories/${created.id}`);
+  }
+
+  if (isEdit && !category) {
     return (
       <div className="clients-page">
         <Link className="client-form__back" to="/admin/vendor-categories">
@@ -45,20 +54,22 @@ function VendorCategoryFormPage({ mode }) {
       <Link className="client-form__back" to="/admin/vendor-categories">
         ← Back to Categories
       </Link>
-      <PageHeader title={title} description={page.description} />
-      <section className="client-form__section">
-        <p>{page.message}</p>
-        {category?.required ? (
-          <p className="categories-note">
-            This is a required Cold Creek Farm category. It cannot be removed or disabled.
-          </p>
-        ) : null}
-        <div className="client-form__actions categories-form-actions">
-          <button className="client-form__cancel" type="button" onClick={() => navigate('/admin/vendor-categories')}>
-            Cancel
-          </button>
-        </div>
-      </section>
+      <PageHeader
+        title={isEdit ? `Edit Category: ${category.name}` : 'Add Category'}
+        description={
+          isEdit
+            ? 'Update this vendor category.'
+            : 'Add an optional vendor category for the preferred vendor list.'
+        }
+      />
+      <CategoryForm
+        key={category?.id || 'new'}
+        initialValues={isEdit ? categoryToForm(category) : emptyCategoryForm}
+        required={Boolean(category?.required)}
+        submitLabel="Save"
+        onSubmit={handleSubmit}
+        onCancel={handleCancel}
+      />
     </div>
   );
 }

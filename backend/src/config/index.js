@@ -25,4 +25,17 @@ export const env = {
     expiresIn: process.env.JWT_EXPIRES_IN || '8h',
     rememberExpiresIn: process.env.JWT_REMEMBER_EXPIRES_IN || '30d',
   },
+  portalUrl: (process.env.PORTAL_URL || 'http://localhost:3000').replace(/\/$/, ''),
+  smtp: {
+    host: process.env.SMTP_HOST || '',
+    port: Number(process.env.SMTP_PORT) || 587,
+    user: process.env.SMTP_USER || '',
+    password: process.env.SMTP_PASSWORD || '',
+    secure: process.env.SMTP_SECURE === 'true',
+    from: String(process.env.SMTP_FROM || process.env.SMTP_USER || '')
+      .replace(/^["']|["']$/g, '')
+      .trim(),
+    ownerEmail: (process.env.SMTP_OWNER_EMAIL || '').trim().toLowerCase(),
+    replyTo: (process.env.SMTP_REPLY_TO || process.env.SMTP_OWNER_EMAIL || '').trim(),
+  },
 };

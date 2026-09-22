@@ -5,7 +5,7 @@ const users = [
   {
     firstName: 'Portal',
     lastName: 'Admin',
-    email: 'admin@ccf.local',
+    email: 'admin@coldcreekfarm.com',
     password: 'CcfAdmin123!',
     role: 'ADMIN',
     status: 'active',
@@ -13,7 +13,7 @@ const users = [
   {
     firstName: 'Portal',
     lastName: 'Client',
-    email: 'client@ccf.local',
+    email: 'client@coldcreekfarm.com',
     password: 'CcfClient123!',
     role: 'CLIENT',
     status: 'active',
@@ -21,29 +21,45 @@ const users = [
   {
     firstName: 'Inactive',
     lastName: 'User',
-    email: 'inactive@ccf.local',
+    email: 'inactive@coldcreekfarm.com',
     password: 'CcfInactive123!',
     role: 'CLIENT',
     status: 'inactive',
   },
 ];
 
+const legacyEmails = ['admin@ccf.local', 'client@ccf.local', 'inactive@ccf.local'];
+
 async function seed() {
   for (const user of users) {
     const passwordHash = await hashPassword(user.password);
     await query(
-      `INSERT INTO users (first_name, last_name, email, password_hash, role, status)
-       VALUES ($1, $2, LOWER($3), $4, $5, $6)
+      `INSERT INTO users (first_name, last_name, email, password_hash, role, status, must_change_password)
+       VALUES ($1, $2, LOWER($3), $4, $5, $6, FALSE)
        ON CONFLICT (email) DO UPDATE
        SET first_name = EXCLUDED.first_name,
            last_name = EXCLUDED.last_name,
            password_hash = EXCLUDED.password_hash,
            role = EXCLUDED.role,
-           status = EXCLUDED.status`,
+           status = EXCLUDED.status,
+           must_change_password = FALSE`,
       [user.firstName, user.lastName, user.email, passwordHash, user.role, user.status],
     );
     console.log(`Seeded ${user.role} user ${user.email}`);
   }
+
+  await query(
+    `UPDATE clients
+     SET user_id = users.id
+     FROM users
+     WHERE LOWER(clients.email) = LOWER(users.email)
+       AND users.role = 'CLIENT'
+       AND clients.user_id IS NULL`,
+  );
+
+  await query(`DELETE FROM users WHERE LOWER(email) = ANY($1::text[])`, [
+    legacyEmails.map((email) => email.toLowerCase()),
+  ]);
 
   await pool.end();
 }

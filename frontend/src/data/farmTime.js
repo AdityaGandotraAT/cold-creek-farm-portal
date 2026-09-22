@@ -54,13 +54,23 @@ export function formatFarmDate(isoDate) {
     return '';
   }
 
-  const [year, month, day] = isoDate.split('-').map(Number);
+  const datePart = String(isoDate).slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(datePart)) {
+    return '';
+  }
+
+  const [year, month, day] = datePart.split('-').map(Number);
+  const date = new Date(Date.UTC(year, month - 1, day, 12));
+  if (Number.isNaN(date.getTime())) {
+    return '';
+  }
+
   return new Intl.DateTimeFormat('en-US', {
     timeZone: 'UTC',
     month: 'short',
     day: 'numeric',
     year: 'numeric',
-  }).format(new Date(Date.UTC(year, month - 1, day, 12)));
+  }).format(date);
 }
 
 export function formatFarmClock(time) {

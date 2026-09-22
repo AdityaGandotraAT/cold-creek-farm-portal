@@ -1,8 +1,9 @@
+import { Link } from 'react-router-dom';
 import { Icon } from '../AdminIcons.jsx';
 import StatusBadge from './StatusBadge.jsx';
 import { bookingStatusTone, formatEventDate } from '../dashboard/format.js';
 
-function ClientRow({ client, onView, onEdit }) {
+function ClientRow({ client }) {
   return (
     <tr>
       <td>
@@ -11,23 +12,31 @@ function ClientRow({ client, onView, onEdit }) {
       </td>
       <td>{client.email}</td>
       <td>{client.phone}</td>
-      <td>{formatEventDate(client.eventDate)}</td>
-      <td>{client.venue}</td>
+      <td>{client.eventDate ? formatEventDate(client.eventDate) : '—'}</td>
+      <td>{client.venue || '—'}</td>
       <td>
-        <StatusBadge tone={bookingStatusTone(client.bookingStatus)}>
-          {client.bookingStatus}
-        </StatusBadge>
+        {client.bookingStatus ? (
+          <StatusBadge tone={bookingStatusTone(client.bookingStatus)}>
+            {client.bookingStatus}
+          </StatusBadge>
+        ) : (
+          '—'
+        )}
       </td>
       <td>
         <div className="clients-table__actions">
-          <button className="clients-action" type="button" onClick={() => onView(client)}>
+          <Link
+            className="clients-action"
+            to={`/admin/clients/${client.id}`}
+            state={{ client }}
+          >
             <Icon name="eye" />
             View
-          </button>
-          <button className="clients-action" type="button" onClick={() => onEdit(client)}>
+          </Link>
+          <Link className="clients-action" to={`/admin/clients/${client.id}/edit`}>
             <Icon name="edit" />
             Edit
-          </button>
+          </Link>
         </div>
       </td>
     </tr>

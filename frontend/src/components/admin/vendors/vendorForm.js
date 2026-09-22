@@ -1,4 +1,4 @@
-import { vendorCategories } from '../../../data/vendorsMock.js';
+import { getVendorCategoryNames } from '../../../data/vendorCategoriesStore.js';
 
 export const emptyVendorForm = {
   category: '',
@@ -53,9 +53,11 @@ export function vendorToForm(vendor) {
 export function validateVendorForm(values) {
   const errors = {};
 
+  const categoryNames = getVendorCategoryNames({ includeInactive: true });
+
   if (!values.category) {
     errors.category = 'Select a vendor category.';
-  } else if (!vendorCategories.includes(values.category)) {
+  } else if (!categoryNames.includes(values.category)) {
     errors.category = 'Select a vendor category.';
   }
 

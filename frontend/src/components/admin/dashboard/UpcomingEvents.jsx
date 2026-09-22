@@ -23,6 +23,9 @@ function UpcomingEvents({ events }) {
         </Link>
       </div>
 
+      {events.length === 0 ? (
+        <p className="dashboard-empty">No upcoming bookings yet.</p>
+      ) : (
       <div className="dashboard-table-wrap dashboard-table-wrap--events">
         <table className="dashboard-table">
           <thead>
@@ -66,7 +69,9 @@ function UpcomingEvents({ events }) {
           </tbody>
         </table>
       </div>
+      )}
 
+      {events.length > 0 ? (
       <ul className="dashboard-event-cards">
         {events.map((event) => (
           <li key={event.id} className="dashboard-event-card">
@@ -91,6 +96,7 @@ function UpcomingEvents({ events }) {
           </li>
         ))}
       </ul>
+      ) : null}
     </section>
   );
 }

@@ -1,9 +1,10 @@
+import { Link } from 'react-router-dom';
 import { Icon } from '../AdminIcons.jsx';
 import ClientRow from './ClientRow.jsx';
 import StatusBadge from './StatusBadge.jsx';
 import { bookingStatusTone, formatEventDate } from '../dashboard/format.js';
 
-function ClientTable({ clients, onView, onEdit }) {
+function ClientTable({ clients }) {
   if (clients.length === 0) {
     return (
       <div className="clients-empty">
@@ -29,12 +30,7 @@ function ClientTable({ clients, onView, onEdit }) {
           </thead>
           <tbody>
             {clients.map((client) => (
-              <ClientRow
-                key={client.id}
-                client={client}
-                onView={onView}
-                onEdit={onEdit}
-              />
+              <ClientRow key={client.id} client={client} />
             ))}
           </tbody>
         </table>
@@ -48,24 +44,31 @@ function ClientTable({ clients, onView, onEdit }) {
                 <strong>{client.name}</strong>
                 <div className="clients-table__ref">{client.referenceNumber}</div>
               </div>
-              <StatusBadge tone={bookingStatusTone(client.bookingStatus)}>
-                {client.bookingStatus}
-              </StatusBadge>
+              {client.bookingStatus ? (
+                <StatusBadge tone={bookingStatusTone(client.bookingStatus)}>
+                  {client.bookingStatus}
+                </StatusBadge>
+              ) : null}
             </div>
             <p>{client.email}</p>
             <p>{client.phone}</p>
             <p>
-              {formatEventDate(client.eventDate)} · {client.venue}
+              {client.eventDate ? formatEventDate(client.eventDate) : 'No event date'} ·{' '}
+              {client.venue || 'No venue'}
             </p>
             <div className="clients-table__actions">
-              <button className="clients-action" type="button" onClick={() => onView(client)}>
+              <Link
+                className="clients-action"
+                to={`/admin/clients/${client.id}`}
+                state={{ client }}
+              >
                 <Icon name="eye" />
                 View
-              </button>
-              <button className="clients-action" type="button" onClick={() => onEdit(client)}>
+              </Link>
+              <Link className="clients-action" to={`/admin/clients/${client.id}/edit`}>
                 <Icon name="edit" />
                 Edit
-              </button>
+              </Link>
             </div>
           </li>
         ))}

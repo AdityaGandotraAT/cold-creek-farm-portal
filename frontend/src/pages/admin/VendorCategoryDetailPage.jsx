@@ -7,7 +7,12 @@ import StatusBadge from '../../components/admin/clients/StatusBadge.jsx';
 import '../../components/admin/vendor-categories/vendorCategories.css';
 import { vendorStatusTone } from '../../components/admin/vendors/format.js';
 import '../../components/admin/vendors/vendors.css';
-import { getVendorCategoryById, withVendorCounts } from '../../data/vendorCategoriesMock.js';
+import { withVendorCounts } from '../../data/vendorCategoriesMock.js';
+import {
+  getVendorCategories,
+  getVendorCategoryById,
+  subscribeVendorCategories,
+} from '../../data/vendorCategoriesStore.js';
 import { getVendors, subscribeVendors } from '../../data/vendorsStore.js';
 
 function DetailItem({ label, value }) {
@@ -22,11 +27,16 @@ function DetailItem({ label, value }) {
 function VendorCategoryDetailPage() {
   const navigate = useNavigate();
   const { categoryId } = useParams();
+  const categories = useSyncExternalStore(
+    subscribeVendorCategories,
+    getVendorCategories,
+    getVendorCategories,
+  );
   const vendors = useSyncExternalStore(subscribeVendors, getVendors, getVendors);
   const category = useMemo(() => {
     const record = getVendorCategoryById(categoryId);
     return record ? withVendorCounts([record], vendors)[0] : null;
-  }, [categoryId, vendors]);
+  }, [categories, categoryId, vendors]);
 
   if (!category) {
     return (
@@ -51,13 +61,24 @@ function VendorCategoryDetailPage() {
         title={`View Category: ${category.name}`}
         description="Review this vendor category. Admin can monitor vendors here; required categories cannot be removed."
         action={
-          <button
-            className="clients-add"
-            type="button"
-            onClick={() => navigate(`/admin/vendors?category=${encodeURIComponent(category.name)}`)}
-          >
-            View Vendors
-          </button>
+          <div className="categories-detail-actions">
+            <button
+              className="clients-add"
+              type="button"
+              onClick={() => navigate(`/admin/vendor-categories/${category.id}/edit`)}
+            >
+              Edit Category
+            </button>
+            <button
+              className="client-form__cancel"
+              type="button"
+              onClick={() =>
+                navigate(`/admin/vendors?category=${encodeURIComponent(category.name)}`)
+              }
+            >
+              View Vendors
+            </button>
+          </div>
         }
       />
       <section className="client-form__section vendor-detail">

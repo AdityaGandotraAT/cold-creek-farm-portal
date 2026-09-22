@@ -1,6 +1,6 @@
 export const defaultSettings = {
   adminName: 'CCF Admin',
-  profileEmail: 'admin@ccf.local',
+  profileEmail: 'admin@coldcreekfarm.com',
   profilePhone: '(706) 216-2013',
   emailNotifications: true,
   clientNotifications: true,

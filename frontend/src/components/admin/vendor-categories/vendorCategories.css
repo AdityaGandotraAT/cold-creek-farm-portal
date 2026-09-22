@@ -67,3 +67,10 @@
 .categories-form-actions {
   margin-top: 16px;
 }
+
+.categories-detail-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}

@@ -3,6 +3,24 @@
   flex-direction: column;
   gap: 22px;
   max-width: 1280px;
+  animation: dashboard-in 0.5s ease both;
+}
+
+@keyframes dashboard-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard {
+    animation: none;
+  }
 }
 
 .dashboard__intro {
@@ -11,14 +29,27 @@
   align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
+  padding: 18px 20px;
+  border: 1px solid color-mix(in srgb, var(--portal-bronze, #b08d6a) 28%, var(--color-border));
+  border-radius: 16px;
+  background:
+    linear-gradient(
+      125deg,
+      color-mix(in srgb, var(--color-surface) 98%, #fff) 0%,
+      color-mix(in srgb, var(--portal-mist, #e8ebe6) 42%, var(--color-surface)) 55%,
+      color-mix(in srgb, var(--color-panel) 65%, var(--color-surface)) 100%
+    );
+  box-shadow:
+    0 1px 0 color-mix(in srgb, #fff 40%, transparent) inset,
+    0 10px 28px rgba(36, 48, 40, 0.05);
 }
 
 .dashboard__kicker {
   margin: 0 0 4px;
-  color: var(--color-text-muted);
-  font-size: 0.78rem;
+  color: var(--portal-bronze, #b08d6a);
+  font-size: 0.74rem;
   font-weight: 650;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
 }
 
@@ -45,10 +76,10 @@
 .dashboard__shortcut {
   display: inline-flex;
   align-items: center;
-  padding: 8px 12px;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: var(--color-surface);
+  padding: 8px 14px;
+  border: 1px solid color-mix(in srgb, var(--portal-bronze, #b08d6a) 30%, var(--color-border));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-surface) 90%, transparent);
   color: var(--color-text);
   font-size: 0.85rem;
   font-weight: 650;
@@ -57,7 +88,7 @@
 
 .dashboard__shortcut:hover,
 .dashboard__shortcut:focus-visible {
-  border-color: var(--color-accent);
+  border-color: var(--portal-bronze, #b08d6a);
 }
 
 .dashboard__shortcut:focus-visible {
@@ -66,9 +97,9 @@
 }
 
 .dashboard__shortcut--primary {
-  border-color: var(--color-button);
-  background: var(--color-button);
-  color: var(--color-button-text);
+  border-color: var(--portal-leaf, var(--color-button));
+  background: var(--portal-leaf, var(--color-button));
+  color: #fff;
 }
 
 .dashboard__cards {
@@ -80,19 +111,35 @@
 .dashboard-card {
   min-width: 0;
   padding: 16px;
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  background: var(--color-surface);
-  box-shadow: 0 1px 2px rgba(36, 48, 40, 0.04);
+  border: 1px solid color-mix(in srgb, var(--color-border) 90%, transparent);
+  border-radius: 16px;
+  background:
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--color-surface) 98%, #fff) 0%,
+      color-mix(in srgb, var(--portal-mist, #e8ebe6) 45%, var(--color-surface)) 100%
+    );
+  box-shadow:
+    0 1px 0 color-mix(in srgb, #fff 40%, transparent) inset,
+    0 10px 28px rgba(36, 48, 40, 0.05);
   text-decoration: none;
   color: inherit;
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .dashboard-card.is-link:hover,
 .dashboard-card.is-link:focus-visible {
-  border-color: var(--color-accent);
-  box-shadow: var(--shadow);
-  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--portal-bronze, #b08d6a) 45%, var(--color-border));
+  box-shadow: 0 14px 32px rgba(36, 48, 40, 0.09);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dashboard-card.is-link:hover {
+    transform: translateY(-2px);
+  }
 }
 
 .dashboard-card.is-link:focus-visible {
@@ -115,9 +162,10 @@
   width: 34px;
   height: 34px;
   margin-bottom: 12px;
-  border-radius: 8px;
-  background: var(--color-panel);
-  color: var(--color-accent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--portal-bronze, #b08d6a) 14%, var(--color-panel));
+  border: 1px solid color-mix(in srgb, var(--portal-bronze, #b08d6a) 28%, var(--color-border));
+  color: var(--portal-forest, var(--color-accent));
 }
 
 .dashboard-card--pending .dashboard-card__icon {
@@ -145,10 +193,11 @@
 
 .dashboard-card__value {
   margin: 8px 0 4px;
-  font-size: 1.75rem;
-  font-weight: 700;
+  font-family: var(--font-serif);
+  font-size: 1.65rem;
+  font-weight: 600;
   line-height: 1.1;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.02em;
 }
 
 .dashboard-card__hint {
@@ -158,10 +207,17 @@
 .dashboard-panel {
   min-width: 0;
   padding: 20px 22px 22px;
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
-  background: var(--color-surface);
-  box-shadow: 0 1px 2px rgba(36, 48, 40, 0.04);
+  border: 1px solid color-mix(in srgb, var(--portal-bronze, #b08d6a) 22%, var(--color-border));
+  border-radius: 16px;
+  background:
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--color-surface) 98%, #fff) 0%,
+      color-mix(in srgb, var(--portal-mist, #e8ebe6) 35%, var(--color-surface)) 100%
+    );
+  box-shadow:
+    0 1px 0 color-mix(in srgb, #fff 40%, transparent) inset,
+    0 10px 28px rgba(36, 48, 40, 0.05);
 }
 
 .dashboard-panel__header {
@@ -189,6 +245,12 @@
   font-size: 0.85rem;
   font-weight: 650;
   text-decoration: none;
+}
+
+.dashboard-empty {
+  margin: 0;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
 }
 
 .dashboard-panel__link:hover {

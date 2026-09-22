@@ -130,3 +130,22 @@ export function toClientPayload(values) {
     googlePlusUrl: values.googlePlusUrl.trim() || null,
   };
 }
+
+export function clientToForm(client) {
+  return {
+    firstName: client.firstName || '',
+    lastName: client.lastName || '',
+    email: client.email || '',
+    birthDate: client.birthDate || '',
+    primaryPhone: client.primaryPhone || client.phone || '',
+    secondaryPhone: client.secondaryPhone || '',
+    address: client.address || '',
+    city: client.city || '',
+    state: client.state || '',
+    zipCode: client.zipCode || '',
+    country: client.country || '',
+    facebookUrl: client.facebookUrl || '',
+    twitterUrl: client.twitterUrl || '',
+    googlePlusUrl: client.googlePlusUrl || '',
+  };
+}

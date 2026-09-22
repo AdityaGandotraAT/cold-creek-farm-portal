@@ -19,7 +19,19 @@ app.use(requestLogger);
 app.use('/api', apiRoutes);
 
 if (existsSync(frontendDist)) {
-  app.use(express.static(frontendDist));
+  app.use(
+    express.static(frontendDist, {
+      setHeaders(res, filePath) {
+        if (
+          path.basename(filePath) === 'index.html' ||
+          filePath.endsWith('.js') ||
+          filePath.endsWith('.css')
+        ) {
+          res.setHeader('Cache-Control', 'no-store');
+        }
+      },
+    }),
+  );
   app.use((req, res, next) => {
     if (req.method !== 'GET' && req.method !== 'HEAD') {
       next();
@@ -31,6 +43,7 @@ if (existsSync(frontendDist)) {
       return;
     }
 
+    res.setHeader('Cache-Control', 'no-store');
     res.sendFile(path.join(frontendDist, 'index.html'), (err) => {
       if (err) {
         next(err);

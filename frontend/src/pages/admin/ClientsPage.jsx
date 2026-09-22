@@ -1,13 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Icon } from '../../components/admin/AdminIcons.jsx';
+import ClientSuccessModal from '../../components/admin/clients/ClientSuccessModal.jsx';
 import ClientTable from '../../components/admin/clients/ClientTable.jsx';
 import Filter from '../../components/admin/clients/Filter.jsx';
 import PageHeader from '../../components/admin/clients/PageHeader.jsx';
-import PlaceholderModal from '../../components/admin/clients/PlaceholderModal.jsx';
 import SearchBar from '../../components/admin/clients/SearchBar.jsx';
 import '../../components/admin/clients/clients.css';
-import { bookingStatusOptions, clients as mockClients } from '../../data/clientsMock.js';
+import { bookingStatusOptions } from '../../data/clientsMock.js';
+import {
+  getClientsState,
+  loadClients,
+  subscribeClients,
+} from '../../data/clientsStore.js';
 
 function matchesSearch(client, query) {
   if (!query) {
@@ -23,16 +28,38 @@ function matchesSearch(client, query) {
 
 function ClientsPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { clients, loading, error } = useSyncExternalStore(
+    subscribeClients,
+    getClientsState,
+    getClientsState,
+  );
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('');
   const [eventDate, setEventDate] = useState('');
-  const [modal, setModal] = useState(null);
+  const [successNotice, setSuccessNotice] = useState(null);
+
+  useEffect(() => {
+    loadClients();
+  }, []);
+
+  useEffect(() => {
+    const notice = location.state?.clientNotice;
+    const clientName = location.state?.clientName;
+
+    if (!notice || !clientName) {
+      return;
+    }
+
+    setSuccessNotice({ kind: notice, clientName });
+    navigate(location.pathname, { replace: true, state: {} });
+  }, [location.pathname, navigate]);
 
   const normalizedQuery = query.trim().toLowerCase();
 
   const visibleClients = useMemo(
     () =>
-      mockClients.filter((client) => {
+      clients.filter((client) => {
         if (!matchesSearch(client, normalizedQuery)) {
           return false;
         }
@@ -47,26 +74,8 @@ function ClientsPage() {
 
         return true;
       }),
-    [normalizedQuery, status, eventDate],
+    [clients, normalizedQuery, status, eventDate],
   );
-
-  useEffect(() => {
-    document.body.style.overflow = modal ? 'hidden' : '';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [modal]);
-
-  useEffect(() => {
-    function onKeyDown(event) {
-      if (event.key === 'Escape') {
-        setModal(null);
-      }
-    }
-
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, []);
 
   return (
     <div className="clients-page">
@@ -112,28 +121,21 @@ function ClientsPage() {
       </div>
 
       <section className="clients-panel">
-        <ClientTable
-          clients={visibleClients}
-          onView={(client) =>
-            setModal({
-              title: `View ${client.name}`,
-              message: 'Client details will be implemented here.',
-            })
-          }
-          onEdit={(client) =>
-            setModal({
-              title: `Edit ${client.name}`,
-              message: 'Client editing will be implemented here.',
-            })
-          }
-        />
+        {loading ? <div className="clients-empty"><p>Loading clients...</p></div> : null}
+        {!loading && error ? (
+          <div className="clients-empty" role="alert">
+            <p>{error}</p>
+          </div>
+        ) : null}
+        {!loading && !error ? <ClientTable clients={visibleClients} /> : null}
       </section>
 
-      {modal ? (
-        <PlaceholderModal
-          title={modal.title}
-          message={modal.message}
-          onClose={() => setModal(null)}
+      {successNotice ? (
+        <ClientSuccessModal
+          kind={successNotice.kind}
+          clientName={successNotice.clientName}
+          showBackLink={false}
+          onClose={() => setSuccessNotice(null)}
         />
       ) : null}
     </div>

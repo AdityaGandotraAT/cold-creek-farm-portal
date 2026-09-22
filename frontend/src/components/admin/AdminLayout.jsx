@@ -35,6 +35,14 @@ function pageMeta(pathname) {
     return titles[pathname];
   }
 
+  if (pathname.startsWith('/admin/clients/') && pathname.endsWith('/edit')) {
+    return { title: 'Edit Client', crumbs: 'Admin / Clients / Edit' };
+  }
+
+  if (pathname.startsWith('/admin/clients/') && pathname !== '/admin/clients/new') {
+    return { title: 'View Client', crumbs: 'Admin / Clients / View' };
+  }
+
   if (pathname.startsWith('/admin/bookings/') && pathname.endsWith('/edit')) {
     return { title: 'Edit Booking', crumbs: 'Admin / Bookings / Edit' };
   }
@@ -140,7 +148,7 @@ function AdminShell() {
 
   return (
     <div
-      className={`admin-shell${collapsed ? ' is-collapsed' : ''}${isCompact ? ' is-compact' : ''}${menuOpen ? ' is-menu-open' : ''}`}
+      className={`admin-shell${collapsed && !isCompact ? ' is-collapsed' : ''}${isCompact ? ' is-compact' : ''}${menuOpen ? ' is-menu-open' : ''}`}
       data-theme={lightMode ? 'light' : 'dark'}
     >
       {menuOpen ? (

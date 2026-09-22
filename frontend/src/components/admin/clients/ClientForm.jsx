@@ -7,14 +7,21 @@ import {
   validateClientForm,
 } from './clientForm.js';
 
-function AddClientForm({ onSubmit, onCancel }) {
+function ClientForm({
+  initialValues = emptyClientForm,
+  submitLabel = 'Save Client',
+  onSubmit,
+  onCancel,
+}) {
   const today = farmTodayISO();
-  const [values, setValues] = useState(emptyClientForm);
+  const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
+  const [submitError, setSubmitError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   function updateField(name, value) {
     setValues((current) => ({ ...current, [name]: value }));
+    setSubmitError('');
     setErrors((current) => {
       if (!current[name]) {
         return current;
@@ -26,24 +33,39 @@ function AddClientForm({ onSubmit, onCancel }) {
     });
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const nextErrors = validateClientForm(values);
     setErrors(nextErrors);
 
     if (Object.keys(nextErrors).length > 0) {
-      const firstError = document.querySelector('.client-form .is-invalid input, .client-form .is-invalid select, .client-form .is-invalid textarea');
+      const firstError = document.querySelector(
+        '.client-form .is-invalid input, .client-form .is-invalid select, .client-form .is-invalid textarea',
+      );
       firstError?.focus();
       return;
     }
 
     setIsSubmitting(true);
-    onSubmit(toClientPayload(values));
-    setIsSubmitting(false);
+    setSubmitError('');
+
+    try {
+      await onSubmit(toClientPayload(values));
+    } catch (err) {
+      setSubmitError(err.message || 'Unable to save client');
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
     <form className="client-form" onSubmit={handleSubmit} noValidate>
+      {submitError ? (
+        <p className="client-form__error" role="alert">
+          {submitError}
+        </p>
+      ) : null}
+
       <section className="client-form__section" aria-labelledby="client-info-heading">
         <h3 id="client-info-heading">Client Information</h3>
         <div className="client-form__grid">
@@ -208,7 +230,7 @@ function AddClientForm({ onSubmit, onCancel }) {
 
       <div className="client-form__actions">
         <button className="clients-add" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Creating...' : 'Create Client'}
+          {isSubmitting ? 'Saving...' : submitLabel}
         </button>
         <button className="client-form__cancel" type="button" onClick={onCancel}>
           Cancel
@@ -218,4 +240,4 @@ function AddClientForm({ onSubmit, onCancel }) {
   );
 }
 
-export default AddClientForm;
+export default ClientForm;

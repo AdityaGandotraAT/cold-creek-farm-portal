@@ -8,6 +8,10 @@ function VendorSelectionOverview({ categories }) {
         </div>
       </div>
 
+      {categories.length === 0 ? (
+        <p className="dashboard-empty">Vendor category totals will appear here after selections are in use.</p>
+      ) : (
+      <>
       <ul className="dashboard-mix-legend" aria-hidden="true">
         <li>
           <span className="dashboard-dot dashboard-dot--selected" />
@@ -22,7 +26,6 @@ function VendorSelectionOverview({ categories }) {
           Unavailable
         </li>
       </ul>
-
       <ul className="dashboard-mix-list">
         {categories.map((row) => (
           <li key={row.category} className="dashboard-mix-row">
@@ -47,6 +50,8 @@ function VendorSelectionOverview({ categories }) {
           </li>
         ))}
       </ul>
+      </>
+      )}
     </section>
   );
 }

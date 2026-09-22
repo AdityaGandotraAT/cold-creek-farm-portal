@@ -14,8 +14,9 @@ function BookingRow({ booking, onView, onEdit }) {
   return (
     <tr>
       <td>
-        <strong>{booking.name}</strong>
+        <strong>{booking.eventName || booking.name}</strong>
       </td>
+      <td>{booking.name}</td>
       <td>{booking.referenceNumber}</td>
       <td>{formatEventDate(booking.eventDate)}</td>
       <td>{formatTimeRange(booking.eventStartTime, booking.eventEndTime)}</td>

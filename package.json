@@ -11,7 +11,13 @@
     "start": "node backend/server.js",
     "migrate": "npm run migrate --prefix backend",
     "seed:auth": "npm run seed:auth --prefix backend",
+    "seed:clients": "npm run seed:clients --prefix backend",
+    "seed:bookings": "npm run seed:bookings --prefix backend",
     "vercel-install": "npm install --prefix frontend --include=dev && npm install --prefix backend",
     "vercel-build": "npm run build --prefix frontend"
+  },
+  "dependencies": {
+    "@neon/config": "^1.3.2",
+    "@neon/env": "^1.2.3"
   }
 }
