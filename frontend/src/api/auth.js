@@ -18,6 +18,38 @@ export async function loginRequest({ email, password, rememberMe }) {
   return data;
 }
 
+export async function forgotPasswordRequest({ email }) {
+  const response = await fetch('/api/auth/forgot-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Unable to send the reset email');
+  }
+
+  return data;
+}
+
+export async function resetPasswordRequest({ token, newPassword }) {
+  const response = await fetch('/api/auth/reset-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, newPassword }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || 'Unable to reset the password');
+  }
+
+  return data;
+}
+
 export async function changePasswordRequest({ currentPassword, newPassword }) {
   const session = getSession();
 

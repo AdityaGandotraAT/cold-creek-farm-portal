@@ -1,18 +1,22 @@
 import { query } from '../config/database.js';
 import { getClientById } from './clientService.js';
-import { sendBookingClientEmail, sendVendorSelectionEmail } from './emailService.js';
+import { listVendors } from './vendorService.js';
+import { sendBookingClientEmail, sendVendorReplyClientEmail, sendVendorSelectionEmail } from './emailService.js';
+import { createAdminNotification, createClientNotification } from './notificationService.js';
+import { getPortalSettings } from './settingsService.js';
 import { HttpError } from '../utils/httpError.js';
 import { env } from '../config/index.js';
+import { signVendorReplyToken, verifyVendorReplyToken } from '../utils/token.js';
 import {
   DEFAULT_VENUE,
   EVENT_TYPE_OPTIONS,
-  REQUIRED_VENDOR_CATEGORIES,
   bookingInputFromBody,
   emptyVendorSelections,
   rowToBooking,
   rowToVendorSelection,
 } from '../utils/bookingMapper.js';
 import { getVendorSelectionLock } from '../utils/vendorSelectionLock.js';
+import { listActiveCategoryNames } from './vendorCategoryService.js';
 
 const STATUS_OPTIONS = ['Confirmed', 'Pending'];
 const UUID_PATTERN =
@@ -26,7 +30,7 @@ const BOOKING_SELECT = `
            SELECT COUNT(*)::int
            FROM booking_vendor_selections s
            WHERE s.booking_id = b.id
-             AND s.selection_status <> 'Not Selected'
+             AND s.selection_status IN ('Confirmed', 'Pending')
              AND s.vendor_name IS NOT NULL
              AND length(trim(s.vendor_name)) > 0
          ) AS selected_count
@@ -204,8 +208,15 @@ export async function getBookingVendorSelections(bookingId) {
   );
 
   const byCategory = new Map(rows.map((row) => [row.category, rowToVendorSelection(row)]));
+  const categories = await listActiveCategoryNames();
+  const names = [...categories];
+  for (const row of rows) {
+    if (row.category && !names.includes(row.category)) {
+      names.push(row.category);
+    }
+  }
 
-  return REQUIRED_VENDOR_CATEGORIES.map((category) => {
+  return names.map((category) => {
     return (
       byCategory.get(category) || {
         category,
@@ -220,11 +231,14 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function getClientVendorWorkspace(userId) {
   const booking = await getBookingForUser(userId);
+  const vendors = await listVendors({ activeOnly: true });
+
   if (!booking) {
     return {
       booking: null,
-      selections: emptyVendorSelections(),
+      selections: emptyVendorSelections(await listActiveCategoryNames()),
       lock: getVendorSelectionLock(null),
+      vendors,
     };
   }
 
@@ -233,6 +247,7 @@ export async function getClientVendorWorkspace(userId) {
     booking,
     selections,
     lock: getVendorSelectionLock(booking.eventDate),
+    vendors,
   };
 }
 
@@ -248,7 +263,8 @@ export async function saveClientVendorSelection(userId, input) {
   }
 
   const category = String(input.category || '').trim();
-  if (!REQUIRED_VENDOR_CATEGORIES.includes(category)) {
+  const allowedCategories = await listActiveCategoryNames();
+  if (!allowedCategories.includes(category)) {
     throw new HttpError(400, 'Invalid vendor category');
   }
 
@@ -269,7 +285,9 @@ export async function saveClientVendorSelection(userId, input) {
   );
   const unchanged =
     String(current?.vendor || '').trim() === vendorName &&
-    (vendorName ? current?.status !== 'Not Selected' : current?.status === 'Not Selected');
+    (vendorName
+      ? current?.status === 'Pending' || current?.status === 'Confirmed'
+      : current?.status === 'Not Selected');
 
   if (!unchanged) {
     await query(
@@ -278,14 +296,63 @@ export async function saveClientVendorSelection(userId, input) {
            selection_status = $4
        WHERE booking_id = $1
          AND category = $2`,
-      [booking.id, category, vendorName || null, vendorName ? 'Confirmed' : 'Not Selected'],
+      [booking.id, category, vendorName || null, vendorName ? 'Pending' : 'Not Selected'],
     );
   }
 
   let emailSent = false;
   if (vendorName && !unchanged) {
     const client = booking.clientId ? await getClientById(booking.clientId) : null;
-    const to = vendorEmail || env.smtp.ownerEmail;
+    const clientName = client
+      ? `${client.firstName} ${client.lastName}`.trim()
+      : booking.name;
+
+    try {
+      await createAdminNotification({
+        type: 'Vendor pending reply',
+        title: `${clientName} selected ${vendorName}`,
+        detail: `${clientName} chose ${vendorName} for ${category} on ${booking.eventName} (${booking.referenceNumber}). Waiting for the vendor to accept or mark unavailable.`,
+        relatedName: vendorName,
+        bookingId: booking.id,
+        clientId: booking.clientId,
+      });
+    } catch (err) {
+      console.error('Admin notification failed:', err.message);
+    }
+    try {
+      await createClientNotification({
+        type: 'Vendor pending reply',
+        title: `Waiting for ${vendorName} to confirm ${category}`,
+        detail: `${vendorName} · ${category} · ${booking.eventName}. You will see an update here when the vendor accepts or is not available.`,
+        relatedName: vendorName,
+        bookingId: booking.id,
+        clientId: booking.clientId,
+      });
+    } catch (err) {
+      console.error('Client notification failed:', err.message);
+    }
+    const settings = await getPortalSettings();
+    const notifyVendors = env.notifyVendors || settings.vendorNotifications;
+    const testInbox = env.vendorTestEmail;
+    const isTestVendor = Boolean(testInbox && vendorEmail && vendorEmail === testInbox);
+    const sendToVendor = (notifyVendors || isTestVendor) && Boolean(vendorEmail);
+    const to = sendToVendor
+      ? vendorEmail
+      : settings.emailNotifications
+        ? env.smtp.ownerEmail
+        : '';
+    let acceptUrl = '';
+    let unavailableUrl = '';
+    if (sendToVendor) {
+      const replyToken = signVendorReplyToken({
+        bookingId: booking.id,
+        category,
+        vendorName,
+      });
+      const replyBase = `${env.portalUrl}/vendor-reply`;
+      acceptUrl = `${replyBase}?token=${encodeURIComponent(replyToken)}&decision=accept`;
+      unavailableUrl = `${replyBase}?token=${encodeURIComponent(replyToken)}&decision=unavailable`;
+    }
     if (to) {
       try {
         await sendVendorSelectionEmail({
@@ -293,7 +360,10 @@ export async function saveClientVendorSelection(userId, input) {
           category,
           vendorName,
           booking,
-          clientName: client ? `${client.firstName} ${client.lastName}`.trim() : booking.name,
+          clientName,
+          internalOnly: !sendToVendor,
+          acceptUrl,
+          unavailableUrl,
         });
         emailSent = true;
       } catch (err) {
@@ -307,12 +377,14 @@ export async function saveClientVendorSelection(userId, input) {
     booking: refreshed,
     selections: await getBookingVendorSelections(booking.id),
     lock: getVendorSelectionLock(booking.eventDate),
+    vendors: await listVendors({ activeOnly: true }),
     emailSent,
   };
 }
 
 async function ensureDefaultSelectionRows(bookingId) {
-  for (const category of REQUIRED_VENDOR_CATEGORIES) {
+  const categories = await listActiveCategoryNames();
+  for (const category of categories) {
     await query(
       `INSERT INTO booking_vendor_selections (booking_id, category, vendor_name, selection_status)
        VALUES ($1, $2, NULL, 'Not Selected')
@@ -344,12 +416,26 @@ async function notifyAssignedClient(booking, previousClientId = null) {
     return { emailSent: false, message: 'Booking saved' };
   }
 
+  const kind = previousClientId === booking.clientId ? 'updated' : 'assigned';
   const client = await getClientById(booking.clientId);
-  if (!client?.email) {
-    return { emailSent: false, message: 'Booking saved' };
+
+  try {
+    await createClientNotification({
+      type: kind === 'updated' ? 'Booking updated' : 'Booking assigned',
+      title: kind === 'updated' ? 'Your event details were updated' : 'Your event is ready',
+      detail: `${booking.eventName} · ${booking.referenceNumber}. Open My Booking for the date, time, and venue.`,
+      relatedName: booking.eventName,
+      bookingId: booking.id,
+      clientId: booking.clientId,
+    });
+  } catch (err) {
+    console.error('Client notification failed:', err.message);
   }
 
-  const kind = previousClientId === booking.clientId ? 'updated' : 'assigned';
+  const settings = await getPortalSettings();
+  if (!settings.clientNotifications || !client?.email) {
+    return { emailSent: false, message: 'Booking saved' };
+  }
 
   try {
     await sendBookingClientEmail({
@@ -370,8 +456,9 @@ async function notifyAssignedClient(booking, previousClientId = null) {
     console.error('Booking client email failed:', err.message);
     return {
       emailSent: false,
-      message:
-        'Booking saved, but the client email could not be sent. You can save again after SMTP is configured.',
+      message: err.message
+        ? `Booking saved, but the client email could not be sent. ${err.message}`
+        : 'Booking saved, but the client email could not be sent. You can save again after SMTP is configured.',
     };
   }
 }
@@ -469,6 +556,143 @@ export async function deleteBooking(id) {
 
   await query('DELETE FROM bookings WHERE id = $1', [id]);
   return existing;
+}
+
+function vendorReplyAlreadyDone(status) {
+  return status === 'Confirmed' || status === 'Unavailable';
+}
+
+export async function previewVendorReply(token) {
+  const payload = verifyVendorReplyToken(token);
+  const booking = await getBookingById(payload.bookingId);
+  if (!booking) {
+    throw new HttpError(404, 'This vendor reply is no longer valid');
+  }
+
+  const selection = (await getBookingVendorSelections(booking.id)).find(
+    (item) => item.category === payload.category,
+  );
+  if (!selection || selection.vendor !== payload.vendorName) {
+    throw new HttpError(400, 'This vendor reply is no longer valid');
+  }
+
+  return {
+    vendorName: payload.vendorName,
+    category: payload.category,
+    eventName: booking.eventName,
+    eventDate: booking.eventDate,
+    venue: booking.venue,
+    referenceNumber: booking.referenceNumber,
+    status: selection.status,
+    alreadyResponded: vendorReplyAlreadyDone(selection.status),
+  };
+}
+
+export async function respondToVendorReply(token, decision) {
+  const normalized = String(decision || '').trim().toLowerCase();
+  if (normalized !== 'accept' && normalized !== 'unavailable') {
+    throw new HttpError(400, 'Choose Accept or Not available');
+  }
+
+  const payload = verifyVendorReplyToken(token);
+  const booking = await getBookingById(payload.bookingId);
+  if (!booking) {
+    throw new HttpError(404, 'This vendor reply is no longer valid');
+  }
+
+  const selection = (await getBookingVendorSelections(booking.id)).find(
+    (item) => item.category === payload.category,
+  );
+  if (!selection || selection.vendor !== payload.vendorName) {
+    throw new HttpError(400, 'This vendor reply is no longer valid');
+  }
+
+  if (vendorReplyAlreadyDone(selection.status)) {
+    return {
+      alreadyResponded: true,
+      status: selection.status,
+      vendorName: selection.vendor,
+      category: selection.category,
+      eventName: booking.eventName,
+      eventDate: booking.eventDate,
+    };
+  }
+
+  const nextStatus = normalized === 'accept' ? 'Confirmed' : 'Unavailable';
+  await query(
+    `UPDATE booking_vendor_selections
+     SET selection_status = $3
+     WHERE booking_id = $1
+       AND category = $2`,
+    [booking.id, payload.category, nextStatus],
+  );
+
+  const client = booking.clientId ? await getClientById(booking.clientId) : null;
+  const clientName = client ? `${client.firstName} ${client.lastName}`.trim() : booking.name;
+  const accepted = nextStatus === 'Confirmed';
+
+  try {
+    await createAdminNotification({
+      type: accepted ? 'Vendor confirmed' : 'Vendor unavailable',
+      title: accepted
+        ? `${payload.vendorName} accepted ${payload.category}`
+        : `${payload.vendorName} is not available for ${payload.category}`,
+      detail: accepted
+        ? `${payload.vendorName} accepted ${payload.category} for ${clientName} on ${booking.eventName}.`
+        : `${payload.vendorName} is not available on this date for ${payload.category}. ${clientName} should choose another vendor.`,
+      relatedName: payload.vendorName,
+      bookingId: booking.id,
+      clientId: booking.clientId,
+    });
+  } catch (err) {
+    console.error('Admin notification failed:', err.message);
+  }
+
+  try {
+    await createClientNotification({
+      type: accepted ? 'Vendor confirmed' : 'Vendor unavailable',
+      title: accepted
+        ? `${payload.vendorName} accepted ${payload.category}`
+        : `${payload.vendorName} is not available for ${payload.category}`,
+      detail: accepted
+        ? `${payload.vendorName} · ${payload.category} · ${booking.eventName}. This vendor is confirmed for your event.`
+        : `${payload.vendorName} · ${payload.category} · ${booking.eventName}. Choose another vendor in Vendor Selections.`,
+      relatedName: payload.vendorName,
+      bookingId: booking.id,
+      clientId: booking.clientId,
+    });
+  } catch (err) {
+    console.error('Client notification failed:', err.message);
+  }
+
+  let emailSent = false;
+  const settings = await getPortalSettings();
+  if (client?.email && settings.clientNotifications) {
+    try {
+      await sendVendorReplyClientEmail({
+        to: client.email,
+        kind: accepted ? 'accepted' : 'unavailable',
+        firstName: client.firstName,
+        lastName: client.lastName,
+        vendorName: payload.vendorName,
+        category: payload.category,
+        booking,
+      });
+      emailSent = true;
+    } catch (err) {
+      console.error('Vendor reply client email failed:', err.message);
+    }
+  }
+
+  return {
+    alreadyResponded: false,
+    status: nextStatus,
+    vendorName: payload.vendorName,
+    category: payload.category,
+    eventName: booking.eventName,
+    eventDate: booking.eventDate,
+    emailSent,
+  };
 }
 
 export { emptyVendorSelections };

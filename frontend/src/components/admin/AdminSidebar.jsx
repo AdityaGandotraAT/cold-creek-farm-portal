@@ -28,7 +28,7 @@ function isVendorPath(pathname) {
   );
 }
 
-function AdminSidebar({ collapsed, hidden, onLogout }) {
+function AdminSidebar({ collapsed, hidden, onLogout, unreadCount = 0 }) {
   const location = useLocation();
   const navigate = useNavigate();
   const vendorActive = isVendorPath(location.pathname);
@@ -129,6 +129,11 @@ function AdminSidebar({ collapsed, hidden, onLogout }) {
                 <Icon name={link.icon} />
               </span>
               {collapsed ? null : <span className="admin-sidebar__label">{link.label}</span>}
+              {link.to === '/admin/notifications' && unreadCount > 0 ? (
+                <span className="admin-sidebar__badge" aria-label={`${unreadCount} unread notifications`}>
+                  {unreadCount > 99 ? '99+' : unreadCount}
+                </span>
+              ) : null}
             </NavLink>
           );
         })}

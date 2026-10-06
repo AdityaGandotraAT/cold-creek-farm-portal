@@ -45,8 +45,8 @@ export function validatePasswordChange(values) {
   requireTrimmed(errors, values, 'newPassword', 'Enter a new password.');
   requireTrimmed(errors, values, 'confirmPassword', 'Confirm the new password.');
 
-  if (!errors.newPassword && values.newPassword.length < 8) {
-    errors.newPassword = 'Use at least 8 characters.';
+  if (!errors.newPassword && values.newPassword.length < 10) {
+    errors.newPassword = 'Use at least 10 characters.';
   }
 
   if (!errors.confirmPassword && values.newPassword !== values.confirmPassword) {

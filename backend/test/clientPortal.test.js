@@ -218,7 +218,8 @@ test('client can save an open vendor selection', async () => {
   assert.equal(before.status, 200);
   assert.equal(before.body.booking.id, bookingId);
   assert.equal(before.body.lock.status, 'Open');
-  assert.equal(before.body.selections.length, 6);
+  assert.ok(before.body.selections.some((row) => row.category === 'Florist'));
+  assert.ok(before.body.selections.length >= 6);
 
   const saveRes = await request(app)
     .put('/api/client/vendor-selections')
@@ -233,9 +234,10 @@ test('client can save an open vendor selection', async () => {
   assert.equal(saveRes.body.emailSent, true);
   const florist = saveRes.body.selections.find((item) => item.category === 'Florist');
   assert.equal(florist.vendor, 'Posh Petals of Gainesville');
-  assert.equal(florist.status, 'Confirmed');
+  assert.equal(florist.status, 'Pending');
   assert.equal(saveRes.body.booking.selectedCount, 1);
-  assert.equal(sentMail.at(-1).to, 'poshpetals@live.com');
+  assert.notEqual(sentMail.at(-1).to, 'poshpetals@live.com');
+  assert.equal(sentMail.at(-1).to, 'jeff@coldcreekfarm.com');
 
   await request(app)
     .delete(`/api/bookings/${bookingId}`)
@@ -277,6 +279,67 @@ test('client cannot change vendors after the lock date', async () => {
 
   await request(app)
     .delete(`/api/bookings/${createRes.body.booking.id}`)
+    .set('Authorization', `Bearer ${admin}`);
+});
+
+test('client can read their profile and only their notifications', async () => {
+  const admin = await adminToken();
+  const client = await clientToken();
+  const clientId = await ensurePortalClientId();
+
+  const account = await request(app)
+    .get('/api/client/account')
+    .set('Authorization', `Bearer ${client}`);
+  assert.equal(account.status, 200);
+  assert.equal(account.body.profile.email, 'client@coldcreekfarm.com');
+  assert.ok(account.body.profile.name);
+
+  const forbidden = await request(app)
+    .get('/api/client/notifications')
+    .set('Authorization', `Bearer ${admin}`);
+  assert.equal(forbidden.status, 403);
+
+  await query('UPDATE bookings SET client_id = NULL WHERE client_id = $1', [clientId]);
+  const createRes = await request(app)
+    .post('/api/bookings')
+    .set('Authorization', `Bearer ${admin}`)
+    .send({
+      name: `Notice Couple ${Date.now()}`,
+      eventName: `Notice Event ${Date.now()}`,
+      eventDate: '2027-08-14',
+      eventStartTime: '15:00',
+      eventEndTime: '22:00',
+      guests: 80,
+      bookingStatus: 'Pending',
+      clientId,
+    });
+  assert.equal(createRes.status, 201);
+  const bookingId = createRes.body.booking.id;
+
+  const list = await request(app)
+    .get('/api/client/notifications')
+    .set('Authorization', `Bearer ${client}`);
+  assert.equal(list.status, 200);
+  const created = list.body.notifications.find(
+    (item) => item.bookingId === bookingId && item.type === 'Booking assigned',
+  );
+  assert.ok(created);
+  assert.equal(created.status, 'Unread');
+  assert.ok(list.body.unreadCount >= 1);
+
+  const marked = await request(app)
+    .patch(`/api/client/notifications/${created.id}/read`)
+    .set('Authorization', `Bearer ${client}`);
+  assert.equal(marked.status, 200);
+  assert.equal(marked.body.notification.status, 'Read');
+
+  const other = await request(app)
+    .patch(`/api/client/notifications/${created.id}/read`)
+    .set('Authorization', `Bearer ${admin}`);
+  assert.equal(other.status, 403);
+
+  await request(app)
+    .delete(`/api/bookings/${bookingId}`)
     .set('Authorization', `Bearer ${admin}`);
 });
 });

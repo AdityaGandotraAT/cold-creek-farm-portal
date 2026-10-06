@@ -10,7 +10,7 @@ const links = [
   { to: '/client/notifications', label: 'Notifications', icon: 'notifications' },
 ];
 
-function ClientSidebar({ collapsed, hidden, onLogout }) {
+function ClientSidebar({ collapsed, hidden, onLogout, unreadCount = 0 }) {
   return (
     <aside
       className={`admin-sidebar${collapsed ? ' is-collapsed' : ''}`}
@@ -42,6 +42,11 @@ function ClientSidebar({ collapsed, hidden, onLogout }) {
               <Icon name={link.icon} />
             </span>
             {collapsed ? null : <span className="admin-sidebar__label">{link.label}</span>}
+            {link.to === '/client/notifications' && unreadCount > 0 ? (
+              <span className="admin-sidebar__badge" aria-label={`${unreadCount} unread notifications`}>
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            ) : null}
           </NavLink>
         ))}
       </nav>

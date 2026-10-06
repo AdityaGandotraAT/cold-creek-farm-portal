@@ -17,6 +17,27 @@ const REQUIRED_VENDOR_CATEGORIES = [
   'Wedding Officiants',
 ];
 
+const PREFERRED_VENDOR_CATEGORIES = [
+  'Videographers',
+  'Photographers',
+  'Photo Booths',
+  'Wedding Coordinators',
+  'Catering',
+  'DJs',
+  'Wedding Officiants',
+  'Florist',
+  'Bakers',
+  'Rentals',
+  'Cartoonist',
+  'Invitations, Save the Dates, Etc',
+  'Treats',
+  'Hair & Make Up',
+  'Additional Add-On Vendors',
+  'Musicians',
+  'Sparklers, Marquee Letters, Neon Signs, Uplighting, Indoor Cold Sparks',
+  'Carriage Services',
+];
+
 function toISODate(value) {
   if (!value) {
     return null;
@@ -60,6 +81,10 @@ function toTimeString(value) {
   return `${String(Number(match[1])).padStart(2, '0')}:${match[2]}`;
 }
 
+function correctWeddingSpelling(value) {
+  return String(value || '').replace(/\bweeding\b/gi, 'Wedding');
+}
+
 export function rowToBooking(row, selectedCount = 0) {
   if (!row) {
     return null;
@@ -75,8 +100,8 @@ export function rowToBooking(row, selectedCount = 0) {
     clientId: row.client_id ? String(row.client_id) : null,
     clientName: clientName || null,
     name: row.name,
-    eventName: row.event_name || row.name,
-    eventType: row.event_type || '',
+    eventName: correctWeddingSpelling(row.event_name || row.name),
+    eventType: correctWeddingSpelling(row.event_type || ''),
     eventDate: toISODate(row.event_date),
     eventStartTime: toTimeString(row.event_start_time),
     eventEndTime: toTimeString(row.event_end_time),
@@ -98,8 +123,8 @@ export function rowToVendorSelection(row) {
   };
 }
 
-export function emptyVendorSelections() {
-  return REQUIRED_VENDOR_CATEGORIES.map((category) => ({
+export function emptyVendorSelections(categories = PREFERRED_VENDOR_CATEGORIES) {
+  return categories.map((category) => ({
     category,
     vendor: null,
     status: 'Not Selected',
@@ -110,8 +135,8 @@ export function bookingInputFromBody(body) {
   return {
     clientId: body.clientId || null,
     name: body.name,
-    eventName: body.eventName,
-    eventType: body.eventType,
+    eventName: correctWeddingSpelling(body.eventName),
+    eventType: correctWeddingSpelling(body.eventType),
     eventDate: body.eventDate,
     eventStartTime: body.eventStartTime,
     eventEndTime: body.eventEndTime,
@@ -122,4 +147,4 @@ export function bookingInputFromBody(body) {
   };
 }
 
-export { DEFAULT_VENUE, EVENT_TYPE_OPTIONS, REQUIRED_VENDOR_CATEGORIES };
+export { DEFAULT_VENUE, EVENT_TYPE_OPTIONS, PREFERRED_VENDOR_CATEGORIES, REQUIRED_VENDOR_CATEGORIES };

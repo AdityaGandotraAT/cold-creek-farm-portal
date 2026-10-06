@@ -266,6 +266,11 @@
   color: var(--color-badge-pending-text);
 }
 
+.clients-badge--unavailable {
+  background: var(--color-badge-alert-bg);
+  color: var(--color-badge-alert-text);
+}
+
 .clients-badge--neutral {
   background: var(--color-panel);
   color: var(--color-text-muted);

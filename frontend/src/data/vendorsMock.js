@@ -1,5 +1,7 @@
 export const SPARKLERS_CATEGORY =
   'Sparklers, Marquee Letters, Neon Signs, Uplighting, Indoor Cold Sparks';
+export const INVITATIONS_CATEGORY = 'Invitations, Save the Dates, Etc';
+export const ADD_ON_CATEGORY = 'Additional Add-On Vendors';
 
 export const vendorCategories = [
   'Videographers',
@@ -13,13 +15,13 @@ export const vendorCategories = [
   'Bakers',
   'Rentals',
   'Cartoonist',
+  INVITATIONS_CATEGORY,
   'Treats',
   'Hair & Make Up',
+  ADD_ON_CATEGORY,
   'Musicians',
   SPARKLERS_CATEGORY,
   'Carriage Services',
-  'Stationery',
-  'Specialty',
 ];
 
 export const vendorStatusOptions = ['Active', 'Inactive'];
@@ -138,6 +140,14 @@ export const seedVendors = [
     website: 'http://momoluxphoto.com',
     description: 'Photography and videography.',
     services: 'Wedding photography and videography',
+  }),
+  vendor({
+    name: 'Aditya',
+    company: 'Aditya',
+    category: 'Videographers',
+    email: 'aditya@agreedtechnologies.com',
+    description: 'Test videographer for portal development. Remove before launch.',
+    services: 'Wedding videography (test)',
   }),
   vendor({
     name: 'Jeremy & Tracie Grizzle',
@@ -306,7 +316,7 @@ export const seedVendors = [
   vendor({
     name: 'Get Tuxed Rentals',
     company: 'Get Tuxed Rentals',
-    category: 'Rentals',
+    category: ADD_ON_CATEGORY,
     email: '',
     phone: '(770) 874-8730',
     website: 'https://www.gettuxedrentals.com',
@@ -324,7 +334,7 @@ export const seedVendors = [
   }),
   vendor({
     name: 'Rick Sefzik',
-    company: 'And So Events',
+    company: 'Rick Sefzik',
     category: 'Wedding Officiants',
     email: 'hello@andsoevents.com',
     phone: '(678) 447-2580',
@@ -351,7 +361,7 @@ export const seedVendors = [
   }),
   vendor({
     name: 'Tiffani Jackson',
-    company: 'A Day With Tiffani',
+    company: 'Tiffani Jackson',
     category: 'Wedding Coordinators',
     email: 'adaywithtiffani@yahoo.com',
     phone: '(770) 519-6657',
@@ -369,7 +379,7 @@ export const seedVendors = [
   }),
   vendor({
     name: 'Amanda Berisford',
-    company: 'Lavender Mint Events and Design',
+    company: 'Amanda Berisford',
     category: 'Wedding Coordinators',
     email: 'amanda@lavenderminteventsanddesign.com',
     phone: '(770) 596-7233',
@@ -509,7 +519,7 @@ export const seedVendors = [
   vendor({
     name: 'Beth Compton',
     company: 'Tinlizzy Design Company',
-    category: 'Stationery',
+    category: INVITATIONS_CATEGORY,
     email: 'tinlizzydesignco@gmail.com',
     phone: '',
     website: 'https://tinlizzydesignco.com',
@@ -555,7 +565,7 @@ export const seedVendors = [
   vendor({
     name: 'Tracy',
     company: 'Wits End Llama',
-    category: 'Specialty',
+    category: ADD_ON_CATEGORY,
     email: 'tracy@witsendllamas.com',
     phone: '(404) 324-8669',
     description: 'Llama guest experience.',
@@ -564,7 +574,7 @@ export const seedVendors = [
   vendor({
     name: 'Tyler Tinsley',
     company: 'Saddle Creek Selects',
-    category: 'Specialty',
+    category: ADD_ON_CATEGORY,
     email: 'Saddlecreekselects@gmail.com',
     phone: '(404) 304-6222',
     description: 'Cigar service.',
@@ -573,7 +583,7 @@ export const seedVendors = [
   vendor({
     name: "Mike's Vitamin Infusions",
     company: "Mike's Vitamin Infusions",
-    category: 'Specialty',
+    category: ADD_ON_CATEGORY,
     email: 'mike@mikesinfusions.com',
     phone: '(770) 344-8844',
     website: 'https://www.mikesinfusions.com',
@@ -584,6 +594,7 @@ export const seedVendors = [
     name: 'Wedding Day Sparklers',
     company: 'Wedding Day Sparklers',
     category: SPARKLERS_CATEGORY,
+    phone: '(763) 786-4278',
     website: 'https://weddingdaysparklers.com/product/36-inch-wedding-sparklers/',
     description: 'Sparklers, marquee letters, neon signs, uplighting, and indoor cold sparks.',
     services: 'Sparklers and event lighting',

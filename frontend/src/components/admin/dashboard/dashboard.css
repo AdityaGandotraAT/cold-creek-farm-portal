@@ -438,8 +438,12 @@
   background: var(--color-track);
 }
 
-.dashboard-mix span {
-  min-width: 0;
+.dashboard-mix.is-empty {
+  background: var(--color-track);
+}
+
+.dashboard-mix.is-empty span {
+  background: transparent;
 }
 
 .dashboard-action {

@@ -75,6 +75,7 @@ function ClientFormPage({ mode }) {
         clientName: result.client.name,
         username: result.client.email,
         temporaryPassword: result.emailSent ? undefined : result.temporaryPassword,
+        emailDetail: result.emailSent ? undefined : result.message,
       },
     });
   }

@@ -8,10 +8,12 @@ const emptyPasswordForm = {
   confirmPassword: '',
 };
 
-function SettingsPasswordModal({ onClose }) {
+function SettingsPasswordModal({ onClose, onSubmit }) {
   const [values, setValues] = useState(emptyPasswordForm);
   const [errors, setErrors] = useState({});
   const [notice, setNotice] = useState('');
+  const [noticeTone, setNoticeTone] = useState('info');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     function onKeyDown(event) {
@@ -33,7 +35,7 @@ function SettingsPasswordModal({ onClose }) {
     setNotice('');
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const nextErrors = validatePasswordChange(values);
     setErrors(nextErrors);
@@ -41,8 +43,19 @@ function SettingsPasswordModal({ onClose }) {
       return;
     }
 
-    setValues(emptyPasswordForm);
-    setNotice('Password changes are not connected yet.');
+    setSaving(true);
+    setNotice('');
+    try {
+      await onSubmit(values);
+      setValues(emptyPasswordForm);
+      setNoticeTone('success');
+      setNotice('Password updated.');
+    } catch (err) {
+      setNoticeTone('error');
+      setNotice(err.message || 'Unable to change password');
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -62,9 +75,9 @@ function SettingsPasswordModal({ onClose }) {
         noValidate
       >
         <h3 id="settings-password-title">Change Password</h3>
-        <p>This form is visual only. Passwords are not updated in this version.</p>
+        <p>Enter your current password, then a new password of at least 10 characters.</p>
         {notice ? (
-          <p className="settings-saved" role="status">
+          <p className={noticeTone === 'error' ? 'client-form__error' : 'settings-saved'} role="status">
             {notice}
           </p>
         ) : null}
@@ -101,8 +114,8 @@ function SettingsPasswordModal({ onClose }) {
           />
         </div>
         <div className="client-form__actions">
-          <button className="clients-add" type="submit">
-            Update Password
+          <button className="clients-add" type="submit" disabled={saving}>
+            {saving ? 'Saving...' : 'Update Password'}
           </button>
           <button className="client-form__cancel" type="button" onClick={onClose}>
             Cancel

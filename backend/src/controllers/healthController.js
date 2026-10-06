@@ -1,9 +1,11 @@
 import { checkDatabaseConnection } from '../services/dbHealthService.js';
+import { getEmailStatus } from '../services/emailService.js';
 
 export function getHealth(_req, res) {
   res.status(200).json({
     status: 'ok',
     message: 'API is running',
+    email: getEmailStatus(),
   });
 }
 

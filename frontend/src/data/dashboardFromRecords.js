@@ -108,7 +108,6 @@ export function dashboardFromRecords({ bookings = [], clients = [] } = {}) {
   return {
     dashboardSummary,
     upcomingEvents,
-    vendorCategoryOverview: [],
     attentionItems,
     recentActivity,
   };

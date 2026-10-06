@@ -30,6 +30,7 @@ function ClientViewPage() {
         clientName: location.state.clientName,
         username: location.state.username,
         temporaryPassword: location.state.temporaryPassword,
+        detail: location.state.emailDetail,
       };
     }
     return null;
@@ -116,6 +117,7 @@ function ClientViewPage() {
         clientName: result.client.name,
         username: result.client.email,
         temporaryPassword: result.emailSent ? undefined : result.temporaryPassword,
+        detail: result.emailSent ? undefined : result.message,
       });
     } catch (err) {
       setResendError(err.message || 'Unable to resend welcome email');
@@ -196,6 +198,7 @@ function ClientViewPage() {
           clientName={successNotice.clientName}
           username={successNotice.username}
           temporaryPassword={successNotice.temporaryPassword}
+          detail={successNotice.detail}
           onClose={() => setSuccessNotice(null)}
         />
       ) : null}

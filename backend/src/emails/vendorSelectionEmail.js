@@ -29,13 +29,22 @@ export function buildVendorSelectionEmail({
   booking,
   clientName,
   portalUrl = env.portalUrl,
+  internalOnly = false,
+  acceptUrl = '',
+  unavailableUrl = '',
 }) {
   const eventDate = formatEventDate(booking.eventDate);
   const couple = clientName || booking.name;
-  const subject = `Cold Creek Farm — ${couple} selected ${vendorName} (${category})`;
+  const subject = internalOnly
+    ? `[Internal] Cold Creek Farm — ${couple} selected ${vendorName} (${category})`
+    : `Cold Creek Farm — Please confirm availability for ${couple}`;
+  const intro = internalOnly
+    ? 'Internal notice only. The preferred vendor was not emailed because the portal is not live yet.'
+    : 'A Cold Creek Farm client selected you for their event. Please confirm whether you are available on this date.';
+  const hasActions = Boolean(acceptUrl && unavailableUrl);
 
   const text = [
-    `A Cold Creek Farm client selected a vendor.`,
+    intro,
     '',
     `Client: ${couple}`,
     `Event: ${booking.eventName}`,
@@ -44,12 +53,29 @@ export function buildVendorSelectionEmail({
     `Category: ${category}`,
     `Vendor: ${vendorName}`,
     `Reference: ${booking.referenceNumber}`,
-    '',
-    `Portal: ${String(portalUrl || '').replace(/\/$/, '')}`,
+    hasActions ? '' : null,
+    hasActions ? `Accept: ${acceptUrl}` : null,
+    hasActions ? `Not available: ${unavailableUrl}` : null,
     '',
     'Regards,',
     'Cold Creek Farm Team',
-  ].join('\n');
+  ]
+    .filter((line) => line !== null)
+    .join('\n');
+
+  const actionHtml = hasActions
+    ? `<p style="margin:0 0 16px;font-size:16px;line-height:1.5;">Please choose one option:</p>
+                <table role="presentation" cellspacing="0" cellpadding="0" style="margin:0 0 16px;">
+                  <tr>
+                    <td style="padding:0 8px 0 0;">
+                      <a href="${escapeHtml(acceptUrl)}" style="display:inline-block;background:#3f5d45;color:#ffffff;text-decoration:none;padding:12px 18px;border-radius:8px;font-family:Georgia,'Times New Roman',serif;font-size:15px;">Accept</a>
+                    </td>
+                    <td style="padding:0;">
+                      <a href="${escapeHtml(unavailableUrl)}" style="display:inline-block;background:#7a2e2e;color:#ffffff;text-decoration:none;padding:12px 18px;border-radius:8px;font-family:Georgia,'Times New Roman',serif;font-size:15px;">Not available</a>
+                    </td>
+                  </tr>
+                </table>`
+    : '';
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -66,13 +92,13 @@ export function buildVendorSelectionEmail({
             <tr>
               <td style="padding:28px 28px 12px;background:#3f5d45;color:#ffffff;">
                 <p style="margin:0;font-size:13px;letter-spacing:0.08em;text-transform:uppercase;">Cold Creek Farm</p>
-                <h1 style="margin:8px 0 0;font-size:24px;font-weight:normal;">Vendor selected</h1>
+                <h1 style="margin:8px 0 0;font-size:24px;font-weight:normal;">Please confirm availability</h1>
               </td>
             </tr>
             <tr>
               <td style="padding:28px;">
-                <p style="margin:0 0 16px;font-size:16px;line-height:1.5;">A client selected a preferred vendor for their event.</p>
-                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 8px;background:#f8f6f1;border:1px solid #e5dfd3;border-radius:8px;">
+                <p style="margin:0 0 16px;font-size:16px;line-height:1.5;">${escapeHtml(intro)}</p>
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin:0 0 16px;background:#f8f6f1;border:1px solid #e5dfd3;border-radius:8px;">
                   <tr>
                     <td style="padding:16px 18px;font-size:15px;line-height:1.6;">
                       <p style="margin:0 0 8px;"><strong>Client:</strong><br />${escapeHtml(couple)}</p>
@@ -83,6 +109,7 @@ export function buildVendorSelectionEmail({
                     </td>
                   </tr>
                 </table>
+                ${actionHtml}
                 <p style="margin:16px 0 0;font-size:16px;line-height:1.5;">
                   Regards,<br />
                   Cold Creek Farm Team

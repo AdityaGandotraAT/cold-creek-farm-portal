@@ -64,11 +64,6 @@ export async function ensureBooking(bookingId) {
     throw new Error('Invalid booking');
   }
 
-  const cached = getBookingById(bookingId);
-  if (cached) {
-    return cached;
-  }
-
   const booking = await fetchBooking(bookingId);
   bookings = [booking, ...bookings.filter((item) => item.id !== booking.id)];
   emit();
@@ -100,10 +95,6 @@ export async function deleteBooking(id) {
 }
 
 export async function ensureBookingVendorSelections(bookingId) {
-  if (selectionsByBookingId.has(bookingId)) {
-    return selectionsByBookingId.get(bookingId);
-  }
-
   const selections = await fetchBookingVendorSelections(bookingId);
   selectionsByBookingId.set(bookingId, selections);
   return selections;

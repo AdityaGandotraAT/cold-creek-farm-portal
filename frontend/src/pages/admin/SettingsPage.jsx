@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import { getSession } from '../../auth/session.js';
+import { useEffect, useState } from 'react';
+import { changePasswordRequest } from '../../api/auth.js';
+import { saveProfileRequest } from '../../api/settings.js';
+import { getSession, saveSession } from '../../auth/session.js';
 import FormField from '../../components/admin/clients/FormField.jsx';
 import PageHeader from '../../components/admin/clients/PageHeader.jsx';
 import '../../components/admin/clients/addClient.css';
@@ -8,12 +10,17 @@ import SettingsConfirmModal from '../../components/admin/settings/SettingsConfir
 import SettingsPasswordModal from '../../components/admin/settings/SettingsPasswordModal.jsx';
 import SettingsToggle from '../../components/admin/settings/SettingsToggle.jsx';
 import '../../components/admin/settings/settings.css';
-import { validateProfileSettings, validateVendorLockSettings } from '../../components/admin/settings/settingsForm.js';
+import {
+  validateProfileSettings,
+  validateVendorLockSettings,
+} from '../../components/admin/settings/settingsForm.js';
 import { defaultSettings, sessionTimeoutOptions } from '../../data/settingsMock.js';
 import {
-  getVendorSelectionLockDays,
-  setVendorSelectionLockDays,
-} from '../../data/vendorSelectionLock.js';
+  getPortalSettingsState,
+  loadPortalSettings,
+  savePortalSettings,
+} from '../../data/settingsStore.js';
+import { getVendorSelectionLockDays } from '../../data/vendorSelectionLock.js';
 
 function profileDefaults() {
   const session = getSession();
@@ -22,7 +29,43 @@ function profileDefaults() {
   return {
     adminName: fullName || defaultSettings.adminName,
     profileEmail: session?.user?.email || defaultSettings.profileEmail,
-    profilePhone: defaultSettings.profilePhone,
+    profilePhone: session?.user?.phone || defaultSettings.profilePhone,
+  };
+}
+
+function settingsToState(record) {
+  return {
+    notifications: {
+      emailNotifications: record?.emailNotifications !== false,
+      clientNotifications: record?.clientNotifications !== false,
+      vendorNotifications: Boolean(record?.vendorNotifications),
+    },
+    security: {
+      sessionTimeout: record?.sessionTimeout || defaultSettings.sessionTimeout,
+      loginSecurity: record?.loginSecurity !== false,
+    },
+    portal: {
+      clientPortalEnabled: record?.clientPortalEnabled !== false,
+      welcomeEmailEnabled: record?.welcomeEmailEnabled !== false,
+      maintenanceMode: Boolean(record?.maintenanceMode),
+    },
+    vendorLock: {
+      lockDays: String(record?.vendorLockDays || getVendorSelectionLockDays()),
+    },
+  };
+}
+
+function combinedPayload({ vendorLock, notifications, security, portal }) {
+  return {
+    vendorLockDays: Number.parseInt(String(vendorLock.lockDays), 10),
+    emailNotifications: notifications.emailNotifications,
+    clientNotifications: notifications.clientNotifications,
+    vendorNotifications: notifications.vendorNotifications,
+    sessionTimeout: security.sessionTimeout,
+    loginSecurity: security.loginSecurity,
+    clientPortalEnabled: portal.clientPortalEnabled,
+    welcomeEmailEnabled: portal.welcomeEmailEnabled,
+    maintenanceMode: portal.maintenanceMode,
   };
 }
 
@@ -48,8 +91,39 @@ function SettingsPage() {
   const [vendorLockErrors, setVendorLockErrors] = useState({});
   const [profileErrors, setProfileErrors] = useState({});
   const [saved, setSaved] = useState({});
+  const [error, setError] = useState('');
+  const [savingSection, setSavingSection] = useState('');
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [maintenanceOpen, setMaintenanceOpen] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    async function load() {
+      try {
+        await loadPortalSettings();
+        if (!active) {
+          return;
+        }
+        const record = getPortalSettingsState();
+        if (record) {
+          const next = settingsToState(record);
+          setNotifications(next.notifications);
+          setSecurity(next.security);
+          setPortal(next.portal);
+          setVendorLock(next.vendorLock);
+        }
+        setProfile(profileDefaults());
+      } catch (err) {
+        if (active) {
+          setError(err.message || 'Unable to load settings');
+        }
+      }
+    }
+    load();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   function markSaved(section) {
     setSaved((current) => ({ ...current, [section]: true }));
@@ -62,19 +136,62 @@ function SettingsPage() {
   function updateSection(setter, section, name, value) {
     setter((current) => ({ ...current, [name]: value }));
     clearSaved(section);
+    setError('');
   }
 
-  function handleSave(event, section, values, validate, setErrors) {
+  async function persistPortal(section) {
+    setSavingSection(section);
+    setError('');
+    try {
+      await savePortalSettings(
+        combinedPayload({ vendorLock, notifications, security, portal }),
+      );
+      markSaved(section);
+    } catch (err) {
+      setError(err.message || 'Unable to save settings');
+    } finally {
+      setSavingSection('');
+    }
+  }
+
+  async function handleSave(event, section, values, validate, setErrors) {
     event.preventDefault();
     const errors = validate ? validate(values) : {};
     setErrors?.(errors);
     if (Object.keys(errors).length > 0) {
       return;
     }
-    if (section === 'vendorLock') {
-      setVendorSelectionLockDays(values.lockDays);
+
+    if (section === 'profile') {
+      setSavingSection('profile');
+      setError('');
+      try {
+        const result = await saveProfileRequest({
+          adminName: values.adminName,
+          profileEmail: values.profileEmail,
+          profilePhone: values.profilePhone,
+        });
+        const session = getSession();
+        if (session?.token && result.user) {
+          saveSession(session.token, result.user, session.rememberMe, {
+            sessionTimeout: session.sessionTimeout,
+          });
+        }
+        setProfile({
+          adminName: [result.user.firstName, result.user.lastName].filter(Boolean).join(' '),
+          profileEmail: result.user.email,
+          profilePhone: result.user.phone || '',
+        });
+        markSaved('profile');
+      } catch (err) {
+        setError(err.message || 'Unable to save profile');
+      } finally {
+        setSavingSection('');
+      }
+      return;
     }
-    markSaved(section);
+
+    await persistPortal(section);
   }
 
   function handleMaintenanceConfirm() {
@@ -89,6 +206,11 @@ function SettingsPage() {
         title="Settings"
         description="Your admin profile and Cold Creek Farm portal preferences."
       />
+      {error ? (
+        <p className="client-form__error" role="alert">
+          {error}
+        </p>
+      ) : null}
 
       <div className="settings-stack">
         <form
@@ -123,8 +245,8 @@ function SettingsPage() {
             />
           </div>
           <div className="client-form__actions">
-            <button className="clients-add" type="submit">
-              Save Changes
+            <button className="clients-add" type="submit" disabled={savingSection === 'vendorLock'}>
+              {savingSection === 'vendorLock' ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>
@@ -137,7 +259,7 @@ function SettingsPage() {
           noValidate
         >
           <h3>My Profile</h3>
-          <p className="settings-note">Your administrator profile for this portal session.</p>
+          <p className="settings-note">This name, email, and phone are used for your admin account.</p>
           {saved.profile ? (
             <p className="settings-saved" role="status">
               Settings saved successfully.
@@ -171,8 +293,8 @@ function SettingsPage() {
             />
           </div>
           <div className="client-form__actions">
-            <button className="clients-add" type="submit">
-              Save Profile
+            <button className="clients-add" type="submit" disabled={savingSection === 'profile'}>
+              {savingSection === 'profile' ? 'Saving...' : 'Save Profile'}
             </button>
             <button className="client-form__cancel" type="button" onClick={() => setPasswordOpen(true)}>
               Change Password
@@ -185,7 +307,9 @@ function SettingsPage() {
           onSubmit={(event) => handleSave(event, 'notifications', notifications)}
         >
           <h3>Notification Settings</h3>
-          <p className="settings-note">Choose which notification types are enabled. Email is not sent yet.</p>
+          <p className="settings-note">
+            Control which emails the portal sends. In-app admin notifications still appear either way.
+          </p>
           {saved.notifications ? (
             <p className="settings-saved" role="status">
               Settings saved successfully.
@@ -195,7 +319,7 @@ function SettingsPage() {
             <SettingsToggle
               id="emailNotifications"
               label="Email Notifications"
-              hint="Receive important portal notifications by email."
+              hint="Send a farm copy of portal emails to the owner inbox."
               checked={notifications.emailNotifications}
               onChange={(value) =>
                 updateSection(setNotifications, 'notifications', 'emailNotifications', value)
@@ -204,7 +328,7 @@ function SettingsPage() {
             <SettingsToggle
               id="clientNotifications"
               label="Client Notifications"
-              hint="Send email notifications related to client activity."
+              hint="Email clients for welcome, booking, and vendor availability replies."
               checked={notifications.clientNotifications}
               onChange={(value) =>
                 updateSection(setNotifications, 'notifications', 'clientNotifications', value)
@@ -213,7 +337,7 @@ function SettingsPage() {
             <SettingsToggle
               id="vendorNotifications"
               label="Vendor Notifications"
-              hint="Send email notifications related to vendor activity."
+              hint="Email preferred vendors when a client selects them. Leave off until the portal is live."
               checked={notifications.vendorNotifications}
               onChange={(value) =>
                 updateSection(setNotifications, 'notifications', 'vendorNotifications', value)
@@ -221,8 +345,8 @@ function SettingsPage() {
             />
           </div>
           <div className="client-form__actions">
-            <button className="clients-add" type="submit">
-              Save Changes
+            <button className="clients-add" type="submit" disabled={savingSection === 'notifications'}>
+              {savingSection === 'notifications' ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>
@@ -232,7 +356,10 @@ function SettingsPage() {
           onSubmit={(event) => handleSave(event, 'security', security)}
         >
           <h3>Security</h3>
-          <p className="settings-note">Display-only preferences. Login and authentication are not changed here.</p>
+          <p className="settings-note">
+            Session timeout signs idle admins out. Login security locks an account after five failed
+            attempts.
+          </p>
           {saved.security ? (
             <p className="settings-saved" role="status">
               Settings saved successfully.
@@ -252,14 +379,14 @@ function SettingsPage() {
             <SettingsToggle
               id="loginSecurity"
               label="Enable Login Security"
-              hint="Show extra login protection in the portal. This does not change the current sign-in process."
+              hint="Temporarily lock an account after five incorrect passwords."
               checked={security.loginSecurity}
               onChange={(value) => updateSection(setSecurity, 'security', 'loginSecurity', value)}
             />
           </div>
           <div className="client-form__actions">
-            <button className="clients-add" type="submit">
-              Save Changes
+            <button className="clients-add" type="submit" disabled={savingSection === 'security'}>
+              {savingSection === 'security' ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>
@@ -269,7 +396,9 @@ function SettingsPage() {
           onSubmit={(event) => handleSave(event, 'portal', portal)}
         >
           <h3>Portal Settings</h3>
-          <p className="settings-note">Control client access and portal messaging. These toggles are local only.</p>
+          <p className="settings-note">
+            These controls apply to every client. Maintenance still lets administrators sign in.
+          </p>
           {saved.portal ? (
             <p className="settings-saved" role="status">
               Settings saved successfully.
@@ -279,7 +408,7 @@ function SettingsPage() {
             <SettingsToggle
               id="clientPortalEnabled"
               label="Client Portal"
-              hint="Allow clients to access the client portal."
+              hint="Allow clients to sign in to the client portal."
               checked={portal.clientPortalEnabled}
               onChange={(value) => updateSection(setPortal, 'portal', 'clientPortalEnabled', value)}
             />
@@ -288,12 +417,14 @@ function SettingsPage() {
               label="Welcome Email"
               hint="Send the welcome email when a client account is created."
               checked={portal.welcomeEmailEnabled}
-              onChange={(value) => updateSection(setPortal, 'portal', 'welcomeEmailEnabled', value)}
+              onChange={(value) =>
+                updateSection(setPortal, 'portal', 'welcomeEmailEnabled', value)
+              }
             />
             <SettingsToggle
               id="maintenanceMode"
               label="Maintenance Mode"
-              hint="Temporarily prevent portal access while maintenance is being performed."
+              hint="Temporarily prevent client access while maintenance is being performed."
               checked={portal.maintenanceMode}
               onChange={(value) => {
                 if (value) {
@@ -305,18 +436,28 @@ function SettingsPage() {
             />
           </div>
           <div className="client-form__actions">
-            <button className="clients-add" type="submit">
-              Save Changes
+            <button className="clients-add" type="submit" disabled={savingSection === 'portal'}>
+              {savingSection === 'portal' ? 'Saving...' : 'Save Changes'}
             </button>
           </div>
         </form>
       </div>
 
-      {passwordOpen ? <SettingsPasswordModal onClose={() => setPasswordOpen(false)} /> : null}
+      {passwordOpen ? (
+        <SettingsPasswordModal
+          onClose={() => setPasswordOpen(false)}
+          onSubmit={async (values) => {
+            await changePasswordRequest({
+              currentPassword: values.currentPassword,
+              newPassword: values.newPassword,
+            });
+          }}
+        />
+      ) : null}
       {maintenanceOpen ? (
         <SettingsConfirmModal
           title="Turn on maintenance mode?"
-          message="This is a preview only. Confirming will mark Maintenance Mode as on in this page. It will not take the portal offline."
+          message="Clients will not be able to sign in until you turn this off. Administrators can still use the portal."
           confirmLabel="Turn On"
           onConfirm={handleMaintenanceConfirm}
           onClose={() => setMaintenanceOpen(false)}

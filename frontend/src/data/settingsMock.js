@@ -4,7 +4,7 @@ export const defaultSettings = {
   profilePhone: '(706) 216-2013',
   emailNotifications: true,
   clientNotifications: true,
-  vendorNotifications: true,
+  vendorNotifications: false,
   sessionTimeout: '30 minutes',
   loginSecurity: true,
   clientPortalEnabled: true,

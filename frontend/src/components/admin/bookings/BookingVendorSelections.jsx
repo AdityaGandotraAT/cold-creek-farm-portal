@@ -1,13 +1,26 @@
+import { vendorCategories as requiredCategories } from '../../../data/bookingsMock.js';
 import StatusBadge from '../clients/StatusBadge.jsx';
 import { bookingStatusTone } from '../dashboard/format.js';
 import VendorSelectionLockStatus from './VendorSelectionLockStatus.jsx';
 
 function BookingVendorSelections({ selections, lock }) {
+  const visibleSelections = [...selections]
+    .filter((item) => item.vendor || requiredCategories.includes(item.category))
+    .sort((a, b) => {
+      const aSelected = a.vendor ? 0 : 1;
+      const bSelected = b.vendor ? 0 : 1;
+      if (aSelected !== bSelected) {
+        return aSelected - bSelected;
+      }
+      return String(a.category).localeCompare(String(b.category));
+    });
+
   return (
     <section className="client-form__section booking-selections" aria-labelledby="booking-selections-heading">
       <h3 id="booking-selections-heading">Vendor Selections</h3>
       <p className="booking-selections__hint">
-        Admin monitoring only. Clients make these selections separately.
+        Admin monitoring only. Pending means the vendor has not replied yet. Unavailable means they
+        cannot take this date, so the client should choose another vendor.
       </p>
       {lock ? <VendorSelectionLockStatus lock={lock} /> : null}
 
@@ -21,7 +34,7 @@ function BookingVendorSelections({ selections, lock }) {
             </tr>
           </thead>
           <tbody>
-            {selections.map((item) => (
+            {visibleSelections.map((item) => (
               <tr key={item.category}>
                 <td>{item.category}</td>
                 <td>{item.vendor || '—'}</td>
@@ -35,7 +48,7 @@ function BookingVendorSelections({ selections, lock }) {
       </div>
 
       <ul className="clients-cards booking-selections__cards">
-        {selections.map((item) => (
+        {visibleSelections.map((item) => (
           <li key={item.category} className="clients-card">
             <div className="clients-card__top">
               <strong>{item.category}</strong>

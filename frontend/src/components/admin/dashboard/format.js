@@ -25,5 +25,9 @@ export function bookingStatusTone(status) {
     return 'pending';
   }
 
+  if (status === 'Unavailable') {
+    return 'unavailable';
+  }
+
   return 'neutral';
 }

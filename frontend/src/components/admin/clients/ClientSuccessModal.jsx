@@ -95,6 +95,7 @@ function ClientSuccessModal({
   clientName,
   username,
   temporaryPassword,
+  detail,
   onClose,
   showBackLink = true,
 }) {
@@ -134,6 +135,7 @@ function ClientSuccessModal({
         </div>
         <h3 id="client-success-title">{content.title}</h3>
         <p>{content.message(clientName)}</p>
+        {detail ? <p className="clients-modal__detail">{detail}</p> : null}
         {temporaryPassword ? (
           <div className="clients-modal__credentials">
             <p>They will choose a new password after signing in.</p>

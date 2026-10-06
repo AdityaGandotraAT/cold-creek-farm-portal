@@ -30,7 +30,7 @@ export const env = {
     host: process.env.SMTP_HOST || '',
     port: Number(process.env.SMTP_PORT) || 587,
     user: process.env.SMTP_USER || '',
-    password: process.env.SMTP_PASSWORD || '',
+    password: String(process.env.SMTP_PASSWORD || '').replace(/\s+/g, ''),
     secure: process.env.SMTP_SECURE === 'true',
     from: String(process.env.SMTP_FROM || process.env.SMTP_USER || '')
       .replace(/^["']|["']$/g, '')
@@ -38,4 +38,6 @@ export const env = {
     ownerEmail: (process.env.SMTP_OWNER_EMAIL || '').trim().toLowerCase(),
     replyTo: (process.env.SMTP_REPLY_TO || process.env.SMTP_OWNER_EMAIL || '').trim(),
   },
+  notifyVendors: process.env.NOTIFY_VENDORS === 'true',
+  vendorTestEmail: (process.env.VENDOR_TEST_EMAIL || '').trim().toLowerCase(),
 };

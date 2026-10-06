@@ -3,7 +3,7 @@ export function notificationTone(type) {
     return 'pending';
   }
 
-  if (type === 'Vendor confirmed') {
+  if (type === 'Vendor confirmed' || type === 'Vendor selected') {
     return 'confirmed';
   }
 
@@ -15,7 +15,7 @@ export function notificationIcon(type) {
     return 'alert';
   }
 
-  if (type === 'Vendor confirmed') {
+  if (type === 'Vendor confirmed' || type === 'Vendor selected') {
     return 'selections';
   }
 

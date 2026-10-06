@@ -1,6 +1,16 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { clearSession, getSession } from '../../auth/session.js';
+import { loadPortalSettings } from '../../data/settingsStore.js';
+import { loadVendorCategories } from '../../data/vendorCategoriesStore.js';
+import { loadVendors } from '../../data/vendorsStore.js';
+import { useSessionTimeout } from '../../auth/useSessionTimeout.js';
+import {
+  getNotificationsUnreadCount,
+  loadNotifications,
+  refreshUnreadNotificationCount,
+  subscribeNotifications,
+} from '../../data/notificationsStore.js';
 import AdminHeader from './AdminHeader.jsx';
 import AdminSidebar from './AdminSidebar.jsx';
 import { AdminThemeProvider, useAdminTheme } from './AdminTheme.jsx';
@@ -87,6 +97,23 @@ function AdminShell() {
   const navigate = useNavigate();
   const session = getSession();
   const page = pageMeta(location.pathname);
+  const unreadCount = useSyncExternalStore(
+    subscribeNotifications,
+    getNotificationsUnreadCount,
+    getNotificationsUnreadCount,
+  );
+  useSessionTimeout();
+
+  useEffect(() => {
+    loadVendors();
+    loadVendorCategories();
+    loadNotifications();
+    loadPortalSettings();
+    const timer = window.setInterval(() => {
+      refreshUnreadNotificationCount();
+    }, 20000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 960px)');
@@ -163,6 +190,7 @@ function AdminShell() {
         collapsed={!isCompact && collapsed}
         hidden={isCompact && !menuOpen}
         onLogout={handleLogout}
+        unreadCount={unreadCount}
       />
       <div className="admin-main">
         <AdminHeader

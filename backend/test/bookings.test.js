@@ -52,7 +52,8 @@ test('admin can create, read, update, and delete bookings', async () => {
     .set('Authorization', `Bearer ${token}`);
 
   assert.equal(selectionsRes.status, 200);
-  assert.equal(selectionsRes.body.selections.length, 6);
+  assert.ok(selectionsRes.body.selections.some((row) => row.category === 'Florist'));
+  assert.ok(selectionsRes.body.selections.length >= 6);
 
   const listRes = await request(app)
     .get('/api/bookings')

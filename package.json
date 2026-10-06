@@ -13,6 +13,7 @@
     "seed:auth": "npm run seed:auth --prefix backend",
     "seed:clients": "npm run seed:clients --prefix backend",
     "seed:bookings": "npm run seed:bookings --prefix backend",
+    "seed:vendors": "npm run seed:vendors --prefix backend",
     "vercel-install": "npm install --prefix frontend --include=dev && npm install --prefix backend",
     "vercel-build": "npm run build --prefix frontend"
   },

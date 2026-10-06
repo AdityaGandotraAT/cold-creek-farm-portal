@@ -33,6 +33,45 @@ export async function fetchMyVendorSelections() {
   return parseResponse(response);
 }
 
+export async function fetchMyAccount() {
+  const response = await fetch('/api/client/account', {
+    headers: authHeaders(),
+  });
+  const data = await parseResponse(response);
+  return data.profile;
+}
+
+export async function fetchMyNotifications() {
+  const response = await fetch('/api/client/notifications', {
+    headers: authHeaders(),
+  });
+  return parseResponse(response);
+}
+
+export async function fetchMyUnreadNotificationCount() {
+  const response = await fetch('/api/client/notifications/unread-count', {
+    headers: authHeaders(),
+  });
+  const data = await parseResponse(response);
+  return Number(data.unreadCount) || 0;
+}
+
+export async function markMyNotificationRead(id) {
+  const response = await fetch(`/api/client/notifications/${id}/read`, {
+    method: 'PATCH',
+    headers: authHeaders(),
+  });
+  return parseResponse(response);
+}
+
+export async function markAllMyNotificationsRead() {
+  const response = await fetch('/api/client/notifications/mark-all-read', {
+    method: 'POST',
+    headers: authHeaders(),
+  });
+  return parseResponse(response);
+}
+
 export async function saveMyVendorSelection(payload) {
   const response = await fetch('/api/client/vendor-selections', {
     method: 'PUT',

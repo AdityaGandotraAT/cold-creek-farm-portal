@@ -1,6 +1,7 @@
 import { query, withTransaction } from '../config/database.js';
 import { createUser, findUserByEmail } from './authService.js';
 import { sendWelcomeClientEmail } from './emailService.js';
+import { getPortalSettings } from './settingsService.js';
 import { HttpError } from '../utils/httpError.js';
 import { clientInputFromBody, rowToClient } from '../utils/clientMapper.js';
 import { hashPassword } from '../utils/password.js';
@@ -138,6 +139,14 @@ export async function getClientById(id) {
   return rowToClient(rows[0]);
 }
 
+export async function getClientByUserId(userId) {
+  const { rows } = await query(
+    'SELECT * FROM clients WHERE user_id = $1 ORDER BY created_at DESC LIMIT 1',
+    [userId],
+  );
+  return rowToClient(rows[0]);
+}
+
 export async function createClient(body) {
   const input = clientInputFromBody(body);
   validateClientInput(input);
@@ -205,6 +214,16 @@ export async function createClient(body) {
   }
 
   try {
+    const settings = await getPortalSettings();
+    if (!settings.welcomeEmailEnabled || !settings.clientNotifications) {
+      return {
+        client: created,
+        emailSent: false,
+        temporaryPassword,
+        message: 'Client created. Welcome email is turned off in Settings.',
+      };
+    }
+
     await sendWelcomeClientEmail({
       to: email,
       firstName: created.firstName,
@@ -232,7 +251,7 @@ export async function createClient(body) {
       client: created,
       emailSent: false,
       temporaryPassword,
-      message: EMAIL_FAILED_MESSAGE,
+      message: err.message ? `${EMAIL_FAILED_MESSAGE} ${err.message}` : EMAIL_FAILED_MESSAGE,
     };
   }
 }
@@ -245,6 +264,11 @@ export async function resendClientWelcomeEmail(clientId) {
 
   if (!existing.userId) {
     throw new HttpError(400, 'This client does not have a portal login account');
+  }
+
+  const settings = await getPortalSettings();
+  if (!settings.welcomeEmailEnabled || !settings.clientNotifications) {
+    throw new HttpError(400, 'Welcome emails are turned off in Settings');
   }
 
   let temporaryPassword;
@@ -281,7 +305,7 @@ export async function resendClientWelcomeEmail(clientId) {
       client: existing,
       emailSent: false,
       temporaryPassword,
-      message: EMAIL_FAILED_MESSAGE,
+      message: err.message ? `${EMAIL_FAILED_MESSAGE} ${err.message}` : EMAIL_FAILED_MESSAGE,
     };
   }
 

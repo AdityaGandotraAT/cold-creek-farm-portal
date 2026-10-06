@@ -4,6 +4,8 @@ import RequireAdmin from './components/admin/RequireAdmin.jsx';
 import ClientLayout from './components/client/ClientLayout.jsx';
 import RequireClient from './components/client/RequireClient.jsx';
 import ChangePasswordPage from './pages/ChangePasswordPage.jsx';
+import ForgotPasswordPage from './pages/ForgotPasswordPage.jsx';
+import ResetPasswordPage from './pages/ResetPasswordPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import BookingsPage from './pages/admin/BookingsPage.jsx';
 import BookingFormPage from './pages/admin/BookingFormPage.jsx';
@@ -21,6 +23,7 @@ import VendorSelectionsPage from './pages/admin/VendorSelectionsPage.jsx';
 import VendorsPage from './pages/admin/VendorsPage.jsx';
 import VendorFormPage from './pages/admin/VendorFormPage.jsx';
 import VendorDetailPage from './pages/admin/VendorDetailPage.jsx';
+import VendorReplyPage from './pages/VendorReplyPage.jsx';
 import ClientAccountPage from './pages/client/ClientAccountPage.jsx';
 import ClientBookingPage from './pages/client/ClientBookingPage.jsx';
 import ClientDashboardPage from './pages/client/ClientDashboardPage.jsx';
@@ -33,6 +36,9 @@ function App() {
       <Route path="/" element={<LoginPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/change-password" element={<ChangePasswordPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/vendor-reply" element={<VendorReplyPage />} />
       <Route element={<RequireClient />}>
         <Route element={<ClientLayout />}>
           <Route path="/client" element={<Navigate to="/client/dashboard" replace />} />

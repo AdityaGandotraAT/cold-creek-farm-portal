@@ -7,7 +7,7 @@ function NotificationList({ notifications, onView, onMarkRead }) {
       <div className="clients-empty notifications-empty">
         <Icon name="notifications" />
         <p>No notifications found.</p>
-        <span>Try a different search, status, or notification type.</span>
+        <span>When a client picks a vendor, it will show here for whoever is operating the portal.</span>
       </div>
     );
   }

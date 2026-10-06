@@ -1,7 +1,13 @@
-import { seedVendors } from './vendorsMock.js';
+import {
+  createVendor as createVendorRequest,
+  fetchVendor,
+  fetchVendors,
+  updateVendorRequest,
+} from '../api/vendors.js';
 
-let vendors = seedVendors.map((vendor) => ({ ...vendor }));
-let nextId = 1100;
+let vendors = [];
+let loading = false;
+let error = '';
 const listeners = new Set();
 
 function emit() {
@@ -12,54 +18,68 @@ export function getVendors() {
   return vendors;
 }
 
-export function getVendorById(id) {
-  return vendors.find((vendor) => vendor.id === id) || null;
-}
-
 export function subscribeVendors(listener) {
   listeners.add(listener);
   return () => listeners.delete(listener);
 }
 
-export function addVendor(payload) {
-  const vendor = {
-    id: `vnd-${nextId}`,
-    status: 'Active',
-    ...payload,
-  };
-  nextId += 1;
-  vendors = [vendor, ...vendors];
+export async function loadVendors() {
+  loading = true;
+  error = '';
+  emit();
+
+  try {
+    vendors = await fetchVendors();
+  } catch (err) {
+    error = err.message || 'Unable to load vendors';
+    vendors = [];
+  } finally {
+    loading = false;
+    emit();
+  }
+
+  return vendors;
+}
+
+export function getVendorById(id) {
+  const target = String(id || '');
+  return vendors.find((vendor) => String(vendor.id) === target) || null;
+}
+
+export async function ensureVendor(vendorId) {
+  if (!vendorId) {
+    throw new Error('Invalid vendor');
+  }
+
+  const cached = getVendorById(vendorId);
+  if (cached) {
+    return cached;
+  }
+
+  const vendor = await fetchVendor(vendorId);
+  vendors = [vendor, ...vendors.filter((item) => item.id !== vendor.id)];
   emit();
   return vendor;
 }
 
-export function updateVendor(id, payload) {
-  const current = getVendorById(id);
-  if (!current) {
-    return null;
-  }
+export async function addVendor(payload) {
+  const vendor = await createVendorRequest(payload);
+  vendors = [vendor, ...vendors.filter((item) => item.id !== vendor.id)];
+  emit();
+  return vendor;
+}
 
-  const vendor = { ...current, ...payload, id };
+export async function updateVendor(id, payload) {
+  const vendor = await updateVendorRequest(id, payload);
   vendors = vendors.map((item) => (item.id === id ? vendor : item));
   emit();
   return vendor;
 }
 
-export function renameVendorCategory(oldName, newName) {
-  if (!oldName || !newName || oldName === newName) {
-    return;
-  }
+export function getVendorsLoading() {
+  return loading;
+}
 
-  let changed = false;
-  vendors = vendors.map((vendor) => {
-    if (vendor.category !== oldName) {
-      return vendor;
-    }
-    changed = true;
-    return { ...vendor, category: newName };
-  });
-
-  if (changed) {
-    emit();
-  }
+export function getVendorsError() {
+  return error;
 }

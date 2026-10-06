@@ -1,4 +1,5 @@
 export const notificationTypeOptions = [
+  'Vendor selected',
   'Vendor pending reply',
   'Vendor confirmed',
   'Vendor unavailable',

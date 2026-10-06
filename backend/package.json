@@ -10,7 +10,8 @@
     "seed:auth": "node scripts/seed-auth-users.js",
     "seed:clients": "node scripts/seed-clients.js",
     "seed:bookings": "node scripts/seed-bookings.js",
-    "test": "node --test test/auth.test.js test/clients.test.js test/bookings.test.js test/clientOnboarding.test.js test/clientPortal.test.js test/bookingEmail.test.js"
+    "seed:vendors": "node scripts/seed-vendors.js",
+    "test": "node --test test/auth.test.js test/clients.test.js test/bookings.test.js test/clientOnboarding.test.js test/clientPortal.test.js test/bookingEmail.test.js test/vendors.test.js test/vendorCategories.test.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

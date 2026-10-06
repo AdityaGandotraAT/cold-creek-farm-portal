@@ -1,4 +1,4 @@
-import { useMemo, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Filter from '../../components/admin/clients/Filter.jsx';
 import PageHeader from '../../components/admin/clients/PageHeader.jsx';
@@ -12,6 +12,9 @@ import {
 } from '../../data/notificationsMock.js';
 import {
   getNotifications,
+  getNotificationsError,
+  getNotificationsLoading,
+  loadNotifications,
   markAllNotificationsRead,
   markNotificationRead,
   subscribeNotifications,
@@ -33,11 +36,25 @@ function NotificationsPage() {
     getNotifications,
     getNotifications,
   );
+  const loading = useSyncExternalStore(
+    subscribeNotifications,
+    getNotificationsLoading,
+    getNotificationsLoading,
+  );
+  const loadError = useSyncExternalStore(
+    subscribeNotifications,
+    getNotificationsError,
+    getNotificationsError,
+  );
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('Unread');
   const [type, setType] = useState('');
   const normalizedQuery = query.trim().toLowerCase();
   const unreadCount = notifications.filter((item) => item.status === 'Unread').length;
+
+  useEffect(() => {
+    loadNotifications();
+  }, []);
 
   const visibleNotifications = useMemo(
     () =>
@@ -63,7 +80,7 @@ function NotificationsPage() {
     <div className="clients-page">
       <PageHeader
         title="Notifications"
-        description="Review booking, vendor, and client alerts for Cold Creek Farm. Email delivery will be connected later."
+        description="Whoever is operating the portal sees client vendor picks here, even if Jeff is not checking email."
         action={
           unreadCount > 0 ? (
             <button
@@ -114,12 +131,22 @@ function NotificationsPage() {
         </Filter>
       </div>
 
+      {loadError ? (
+        <p className="client-form__error" role="alert">
+          {loadError}
+        </p>
+      ) : null}
+
       <section className="clients-panel">
-        <NotificationList
-          notifications={visibleNotifications}
-          onView={(item) => navigate(`/admin/bookings/${item.bookingId}`)}
-          onMarkRead={(item) => markNotificationRead(item.id)}
-        />
+        {loading && notifications.length === 0 ? (
+          <p className="notifications-empty">Loading notifications...</p>
+        ) : (
+          <NotificationList
+            notifications={visibleNotifications}
+            onView={(item) => navigate(`/admin/bookings/${item.bookingId}`)}
+            onMarkRead={(item) => markNotificationRead(item.id)}
+          />
+        )}
       </section>
     </div>
   );

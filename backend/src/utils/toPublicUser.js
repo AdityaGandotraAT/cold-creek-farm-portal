@@ -4,6 +4,7 @@ export function toPublicUser(user) {
     firstName: user.first_name,
     lastName: user.last_name,
     email: user.email,
+    phone: user.phone || '',
     role: user.role,
     status: user.status,
     mustChangePassword: Boolean(user.must_change_password),

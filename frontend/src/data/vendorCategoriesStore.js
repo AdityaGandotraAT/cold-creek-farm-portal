@@ -1,11 +1,14 @@
 import {
-  categoryIdFromName,
-  requiredVendorCategoryNames,
-  seedVendorCategoryRecords,
-} from './vendorCategoriesMock.js';
-import { renameVendorCategory } from './vendorsStore.js';
+  createVendorCategory as createVendorCategoryRequest,
+  fetchVendorCategory,
+  fetchVendorCategories,
+  updateVendorCategoryRequest,
+} from '../api/vendorCategories.js';
+import { loadVendors } from './vendorsStore.js';
 
-let categories = seedVendorCategoryRecords.map((category) => ({ ...category }));
+let categories = [];
+let loading = false;
+let error = '';
 const listeners = new Set();
 
 function emit() {
@@ -21,6 +24,24 @@ export function subscribeVendorCategories(listener) {
   return () => listeners.delete(listener);
 }
 
+export async function loadVendorCategories() {
+  loading = true;
+  error = '';
+  emit();
+
+  try {
+    categories = await fetchVendorCategories();
+  } catch (err) {
+    error = err.message || 'Unable to load categories';
+    categories = [];
+  } finally {
+    loading = false;
+    emit();
+  }
+
+  return categories;
+}
+
 export function getVendorCategoryById(id) {
   const target = String(id || '');
   return categories.find((category) => String(category.id) === target) || null;
@@ -32,68 +53,41 @@ export function getVendorCategoryNames({ includeInactive = false } = {}) {
     .map((category) => category.name);
 }
 
-export function addVendorCategory(payload) {
-  const name = String(payload.name || '').trim();
-  if (!name) {
-    throw new Error('Enter a category name.');
+export async function ensureVendorCategory(categoryId) {
+  if (!categoryId) {
+    throw new Error('Invalid category');
   }
 
-  const id = categoryIdFromName(name);
-  if (categories.some((category) => category.id === id || category.name.toLowerCase() === name.toLowerCase())) {
-    throw new Error('A category with this name already exists.');
+  const cached = getVendorCategoryById(categoryId);
+  if (cached) {
+    return cached;
   }
 
-  const category = {
-    id,
-    name,
-    status: payload.status === 'Inactive' ? 'Inactive' : 'Active',
-    required: false,
-  };
-
-  categories = [category, ...categories];
+  const category = await fetchVendorCategory(categoryId);
+  categories = [category, ...categories.filter((item) => item.id !== category.id)];
   emit();
   return category;
 }
 
-export function updateVendorCategory(id, payload) {
-  const current = getVendorCategoryById(id);
-  if (!current) {
-    throw new Error('Category not found.');
-  }
-
-  const name = String(payload.name || '').trim();
-  if (!name) {
-    throw new Error('Enter a category name.');
-  }
-
-  const nextId = categoryIdFromName(name);
-  const duplicate = categories.find(
-    (category) =>
-      category.id !== current.id &&
-      (category.id === nextId || category.name.toLowerCase() === name.toLowerCase()),
-  );
-  if (duplicate) {
-    throw new Error('A category with this name already exists.');
-  }
-
-  let status = payload.status === 'Inactive' ? 'Inactive' : 'Active';
-  if (current.required || requiredVendorCategoryNames.includes(current.name)) {
-    status = 'Active';
-  }
-
-  const nextName = current.required ? current.name : name;
-  const category = {
-    ...current,
-    id: current.required ? current.id : nextId,
-    name: nextName,
-    status,
-    required: current.required,
-  };
-
-  categories = categories.map((item) => (item.id === current.id ? category : item));
-  if (nextName !== current.name) {
-    renameVendorCategory(current.name, nextName);
-  }
+export async function addVendorCategory(payload) {
+  const category = await createVendorCategoryRequest(payload);
+  categories = [category, ...categories.filter((item) => item.id !== category.id)];
   emit();
   return category;
+}
+
+export async function updateVendorCategory(id, payload) {
+  const category = await updateVendorCategoryRequest(id, payload);
+  categories = categories.map((item) => (item.id === id ? category : item));
+  emit();
+  await loadVendors();
+  return category;
+}
+
+export function getVendorCategoriesLoading() {
+  return loading;
+}
+
+export function getVendorCategoriesError() {
+  return error;
 }

@@ -1,9 +1,14 @@
+import dns from 'node:dns/promises';
+import net from 'node:net';
 import nodemailer from 'nodemailer';
 import { env } from '../config/index.js';
 import { HttpError } from '../utils/httpError.js';
 import { buildWelcomeClientEmail } from '../emails/welcomeClientEmail.js';
 import { buildBookingClientEmail } from '../emails/bookingClientEmail.js';
 import { buildVendorSelectionEmail } from '../emails/vendorSelectionEmail.js';
+import { buildVendorReplyClientEmail } from '../emails/vendorReplyClientEmail.js';
+import { buildPasswordResetEmail } from '../emails/passwordResetEmail.js';
+import { getPortalSettings } from './settingsService.js';
 
 let transporterOverride = null;
 let cachedTransporter = null;
@@ -21,7 +26,29 @@ export function assertSmtpConfigured() {
   }
 }
 
-function createTransporter() {
+async function ipv4Host(hostname) {
+  if (!hostname || net.isIP(hostname)) {
+    return hostname;
+  }
+
+  try {
+    const addresses = await dns.resolve4(hostname);
+    if (addresses[0]) {
+      return addresses[0];
+    }
+  } catch {
+    // Fall through to a single-family lookup.
+  }
+
+  const lookedUp = await dns.lookup(hostname, { family: 4 });
+  return lookedUp.address;
+}
+
+function resetTransporter() {
+  cachedTransporter = null;
+}
+
+async function createTransporter() {
   if (transporterOverride) {
     return transporterOverride;
   }
@@ -32,10 +59,20 @@ function createTransporter() {
 
   assertSmtpConfigured();
 
+  const hostname = env.smtp.host;
+  const secure = env.smtp.secure || env.smtp.port === 465;
   const options = {
-    host: env.smtp.host,
+    host: await ipv4Host(hostname),
     port: env.smtp.port,
-    secure: env.smtp.secure,
+    secure,
+    requireTLS: !secure,
+    connectionTimeout: 12000,
+    greetingTimeout: 12000,
+    socketTimeout: 15000,
+    tls: {
+      minVersion: 'TLSv1.2',
+      servername: hostname,
+    },
   };
 
   if (env.smtp.user) {
@@ -47,6 +84,18 @@ function createTransporter() {
 
   cachedTransporter = nodemailer.createTransport(options);
   return cachedTransporter;
+}
+
+export function getEmailStatus() {
+  return {
+    configured: smtpConfigured(),
+    host: env.smtp.host || null,
+    port: env.smtp.port,
+    from: env.smtp.from || null,
+    user: env.smtp.user || null,
+    hasPassword: Boolean(env.smtp.password),
+    provider: usesResend() ? 'resend' : /gmail/i.test(env.smtp.host || '') ? 'gmail' : 'smtp',
+  };
 }
 
 export function __setMailTransporterForTests(transporter) {
@@ -178,8 +227,6 @@ async function sendViaResendApi(payload) {
     body.reply_to = replyTo.length === 1 ? replyTo[0] : replyTo;
   }
 
-  console.log('Sending email', { from: body.from, to: body.to });
-
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -215,28 +262,54 @@ export async function sendMail({ to, subject, text, html, cc }) {
     ...(cc ? { cc } : {}),
   };
 
-  const bcc = ownerBcc(payload.to);
+  let copyOwner = shouldCopyOwnerOnEmail();
+  try {
+    const settings = await getPortalSettings();
+    copyOwner = copyOwner && settings.emailNotifications;
+  } catch {
+    // Keep the default owner-copy behavior if settings cannot be read.
+  }
+
+  const bcc = copyOwner ? ownerBcc(payload.to) : undefined;
   if (bcc) {
     payload.bcc = bcc;
   }
 
-  if (shouldCopyOwnerOnEmail() && env.smtp.replyTo) {
+  if (copyOwner && env.smtp.replyTo) {
     payload.replyTo = env.smtp.replyTo;
   }
 
-  const send = (mail) => {
+  const send = async (mail) => {
+    console.log('Sending email', {
+      provider: usesResend() ? 'resend' : env.smtp.host,
+      from: mail.from,
+      to: mail.to,
+    });
     if (transporterOverride) {
       return transporterOverride.sendMail(mail);
     }
     if (usesResend()) {
       return sendViaResendApi(mail);
     }
-    return createTransporter().sendMail(mail);
+    const transporter = await createTransporter();
+    return transporter.sendMail(mail);
   };
 
   try {
     return await send(payload);
   } catch (err) {
+    const connectionFailed = ['ESOCKET', 'ECONNECTION', 'ETIMEDOUT', 'ENETUNREACH', 'EHOSTUNREACH'].includes(
+      String(err?.code || ''),
+    );
+    if (connectionFailed && !transporterOverride && !usesResend()) {
+      resetTransporter();
+      try {
+        return await send(payload);
+      } catch (retryErr) {
+        logSendError(retryErr);
+        throw mapSendError(retryErr);
+      }
+    }
     const canRetryWithoutOwnerCopy = Boolean(payload.bcc || payload.replyTo);
     if (canRetryWithoutOwnerCopy && String(err?.code || '') === 'EMESSAGE') {
       console.warn('Retrying email without owner copy after SMTP rejection');
@@ -305,12 +378,64 @@ export async function sendVendorSelectionEmail({
   vendorName,
   booking,
   clientName,
+  internalOnly = false,
+  acceptUrl = '',
+  unavailableUrl = '',
 }) {
   const email = buildVendorSelectionEmail({
     category,
     vendorName,
     booking,
     clientName,
+    portalUrl: env.portalUrl,
+    internalOnly,
+    acceptUrl,
+    unavailableUrl,
+  });
+
+  await sendMail({
+    to,
+    subject: email.subject,
+    text: email.text,
+    html: email.html,
+  });
+
+  return email;
+}
+
+export async function sendPasswordResetEmail({ to, firstName, resetUrl }) {
+  const email = buildPasswordResetEmail({
+    firstName,
+    resetUrl,
+    portalUrl: env.portalUrl,
+  });
+
+  await sendMail({
+    to,
+    subject: email.subject,
+    text: email.text,
+    html: email.html,
+  });
+
+  return email;
+}
+
+export async function sendVendorReplyClientEmail({
+  to,
+  kind,
+  firstName,
+  lastName,
+  vendorName,
+  category,
+  booking,
+}) {
+  const email = buildVendorReplyClientEmail({
+    kind,
+    firstName,
+    lastName,
+    vendorName,
+    category,
+    booking,
     portalUrl: env.portalUrl,
   });
 

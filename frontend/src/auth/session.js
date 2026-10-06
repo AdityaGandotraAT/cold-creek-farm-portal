@@ -1,7 +1,13 @@
 const SESSION_KEY = 'ccf.session';
 
-export function saveSession(token, user, rememberMe) {
-  const payload = JSON.stringify({ token, user });
+export function saveSession(token, user, rememberMe, extras = {}) {
+  const payload = JSON.stringify({
+    token,
+    user,
+    rememberMe: Boolean(rememberMe),
+    sessionTimeout: extras.sessionTimeout || '30 minutes',
+    startedAt: Date.now(),
+  });
 
   sessionStorage.removeItem(SESSION_KEY);
   localStorage.removeItem(SESSION_KEY);

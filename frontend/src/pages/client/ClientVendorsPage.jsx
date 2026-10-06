@@ -4,14 +4,12 @@ import StatusBadge from '../../components/admin/clients/StatusBadge.jsx';
 import '../../components/admin/clients/clients.css';
 import { bookingStatusTone, formatEventDate } from '../../components/admin/dashboard/format.js';
 import { fetchMyVendorSelections, saveMyVendorSelection } from '../../api/clientPortal.js';
-import { REQUIRED_VENDOR_CATEGORIES, vendorCategories } from '../../data/bookingsMock.js';
-import { getVendors } from '../../data/vendorsStore.js';
+import { REQUIRED_VENDOR_CATEGORIES, vendorCategories as requiredCategories } from '../../data/bookingsMock.js';
+import { vendorCategories as preferredCategories } from '../../data/vendorsMock.js';
 import { getVendorSelectionLockDays } from '../../data/vendorSelectionLock.js';
 
-function vendorsForCategory(category) {
-  return getVendors().filter(
-    (vendor) => vendor.category === category && vendor.status === 'Active',
-  );
+function vendorsForCategory(vendors, category) {
+  return vendors.filter((vendor) => vendor.category === category && vendor.status === 'Active');
 }
 
 function remainingLabel(lock) {
@@ -34,14 +32,24 @@ function ClientVendorsPage() {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [savingCategory, setSavingCategory] = useState('');
+  const [catalogVendors, setCatalogVendors] = useState([]);
 
   const catalog = useMemo(() => {
     const map = {};
-    for (const category of vendorCategories) {
-      map[category] = vendorsForCategory(category);
+    const extraCategories = catalogVendors
+      .map((vendor) => vendor.category)
+      .filter((category) => category && !preferredCategories.includes(category));
+    const categories = [...preferredCategories, ...extraCategories];
+
+    for (const category of categories) {
+      map[category] = vendorsForCategory(catalogVendors, category);
     }
     return map;
-  }, []);
+  }, [catalogVendors]);
+
+  const catalogCategories = Object.keys(catalog).filter(
+    (category) => (catalog[category] || []).length > 0,
+  );
 
   useEffect(() => {
     let active = true;
@@ -55,6 +63,7 @@ function ClientVendorsPage() {
           setBooking(data.booking || null);
           setSelections(data.selections || []);
           setLock(data.lock || null);
+          setCatalogVendors(data.vendors || []);
         }
       } catch (err) {
         if (active) {
@@ -74,7 +83,7 @@ function ClientVendorsPage() {
   }, []);
 
   const selectedCount = selections.filter(
-    (item) => item.vendor && item.status !== 'Not Selected',
+    (item) => item.vendor && (item.status === 'Pending' || item.status === 'Confirmed'),
   ).length;
   const locked = Boolean(lock?.locked);
 
@@ -99,9 +108,12 @@ function ClientVendorsPage() {
       setBooking(data.booking || booking);
       setSelections(data.selections || []);
       setLock(data.lock || lock);
+      if (data.vendors) {
+        setCatalogVendors(data.vendors);
+      }
       setNotice(
         vendor
-          ? `${vendor.name} saved for ${category}.`
+          ? `${vendor.name} saved for ${category}. They will confirm availability by email.`
           : `${category} selection cleared.`,
       );
     } catch (err) {
@@ -149,8 +161,8 @@ function ClientVendorsPage() {
           <p className="client-stub__kicker">Your vendors</p>
           <h2>Vendor Selections</h2>
           <p>
-            Choose one preferred vendor in each required category for {booking.eventName}. You
-            can change a pick until selections lock.
+            Choose preferred Cold Creek Farm vendors for {booking.eventName}. The six required
+            categories must be filled; you can also pick from the rest of the preferred list.
           </p>
         </div>
         <StatusBadge tone={lock?.status === 'Open' ? 'confirmed' : 'pending'}>
@@ -190,25 +202,31 @@ function ClientVendorsPage() {
       <p className={`client-vendors__lock${locked ? ' is-locked' : ''}`}>
         {locked
           ? 'Selections are locked. Contact Cold Creek Farm if a vendor needs to change.'
-          : 'Pick a vendor in each category. The farm and the vendor are notified when you save.'}
+          : 'Pick a vendor in each category. The vendor is emailed Accept or Not available. If they cannot take the date, you will be asked to choose another vendor.'}
       </p>
 
       <div className="client-vendors__list">
-        {selections.map((item) => {
-          const options = catalog[item.category] || [];
+        {catalogCategories.map((category) => {
+          const item = selections.find((selection) => selection.category === category) || {
+            category,
+            vendor: null,
+            status: 'Not Selected',
+          };
+          const options = catalog[category] || [];
           const selected = options.find((vendor) => vendor.name === item.vendor) || null;
-          const busy = savingCategory === item.category;
+          const busy = savingCategory === category;
+          const required = requiredCategories.includes(category);
 
           return (
             <section
-              key={item.category}
+              key={category}
               className="client-booking__panel client-vendors__card"
-              aria-labelledby={`vendor-category-${item.category}`}
+              aria-labelledby={`vendor-category-${category}`}
             >
               <div className="client-vendors__card-head">
                 <div>
-                  <h3 id={`vendor-category-${item.category}`}>{item.category}</h3>
-                  <p>Preferred Cold Creek Farm vendors</p>
+                  <h3 id={`vendor-category-${category}`}>{category}</h3>
+                  <p>{required ? 'Required category' : 'Additional preferred vendors'}</p>
                 </div>
                 <StatusBadge tone={bookingStatusTone(item.status)}>{item.status}</StatusBadge>
               </div>
@@ -219,7 +237,7 @@ function ClientVendorsPage() {
               <select
                 id={`vendor-select-${item.category}`}
                 className="client-vendors__select"
-                value={item.vendor || ''}
+                value={item.status === 'Unavailable' ? '' : item.vendor || ''}
                 disabled={locked || Boolean(savingCategory)}
                 onChange={(event) => handleSelect(item.category, event.target.value)}
               >
@@ -231,6 +249,11 @@ function ClientVendorsPage() {
                 ))}
               </select>
               {busy ? <p className="client-vendors__saving">Saving...</p> : null}
+              {item.status === 'Unavailable' ? (
+                <p className="client-vendors__empty">
+                  {item.vendor} is not available on this date. Please choose another vendor.
+                </p>
+              ) : null}
 
               {selected ? (
                 <dl className="client-booking__facts client-vendors__facts">

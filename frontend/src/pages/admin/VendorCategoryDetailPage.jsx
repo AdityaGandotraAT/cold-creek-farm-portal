@@ -1,5 +1,5 @@
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { useMemo, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useSyncExternalStore } from 'react';
 import PageHeader from '../../components/admin/clients/PageHeader.jsx';
 import '../../components/admin/clients/addClient.css';
 import '../../components/admin/clients/clients.css';
@@ -9,6 +9,7 @@ import { vendorStatusTone } from '../../components/admin/vendors/format.js';
 import '../../components/admin/vendors/vendors.css';
 import { withVendorCounts } from '../../data/vendorCategoriesMock.js';
 import {
+  ensureVendorCategory,
   getVendorCategories,
   getVendorCategoryById,
   subscribeVendorCategories,
@@ -33,6 +34,11 @@ function VendorCategoryDetailPage() {
     getVendorCategories,
   );
   const vendors = useSyncExternalStore(subscribeVendors, getVendors, getVendors);
+
+  useEffect(() => {
+    ensureVendorCategory(categoryId).catch(() => {});
+  }, [categoryId]);
+
   const category = useMemo(() => {
     const record = getVendorCategoryById(categoryId);
     return record ? withVendorCounts([record], vendors)[0] : null;

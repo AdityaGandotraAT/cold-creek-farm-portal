@@ -1,4 +1,9 @@
-import { changePassword, login } from '../services/authService.js';
+import {
+  changePassword,
+  login,
+  requestPasswordReset,
+  resetPasswordWithToken,
+} from '../services/authService.js';
 import { toPublicUser } from '../utils/toPublicUser.js';
 
 export async function postLogin(req, res, next) {
@@ -11,6 +16,8 @@ export async function postLogin(req, res, next) {
       message: 'Login successful',
       token: result.token,
       user: result.user,
+      sessionTimeout: result.sessionTimeout,
+      rememberMe: result.rememberMe,
     });
   } catch (err) {
     next(err);
@@ -34,6 +41,27 @@ export async function postChangePassword(req, res, next) {
       message: 'Password updated',
       user,
     });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function postForgotPassword(req, res, next) {
+  try {
+    const result = await requestPasswordReset(req.body?.email);
+    res.status(200).json({ status: 'ok', message: result.message });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function postResetPassword(req, res, next) {
+  try {
+    const result = await resetPasswordWithToken({
+      token: req.body?.token,
+      newPassword: req.body?.newPassword,
+    });
+    res.status(200).json({ status: 'ok', message: result.message });
   } catch (err) {
     next(err);
   }

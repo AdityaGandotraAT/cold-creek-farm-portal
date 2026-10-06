@@ -1,4 +1,4 @@
-import { useMemo, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from '../../components/admin/AdminIcons.jsx';
 import Filter from '../../components/admin/clients/Filter.jsx';
@@ -11,9 +11,10 @@ import { vendorStatusOptions } from '../../data/vendorsMock.js';
 import { withVendorCounts } from '../../data/vendorCategoriesMock.js';
 import {
   getVendorCategories,
+  loadVendorCategories,
   subscribeVendorCategories,
 } from '../../data/vendorCategoriesStore.js';
-import { getVendors, subscribeVendors } from '../../data/vendorsStore.js';
+import { getVendors, loadVendors, subscribeVendors } from '../../data/vendorsStore.js';
 
 function VendorCategoriesPage() {
   const navigate = useNavigate();
@@ -26,6 +27,11 @@ function VendorCategoriesPage() {
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState('');
   const normalizedQuery = query.trim().toLowerCase();
+
+  useEffect(() => {
+    loadVendorCategories();
+    loadVendors();
+  }, []);
 
   const categories = useMemo(
     () => withVendorCounts(categoryRecords, vendors),

@@ -1,6 +1,20 @@
 const FARM_TIME_ZONE = 'America/New_York';
 export const VENDOR_SELECTION_LOCK_DAYS = 90;
 
+let configuredLockDays = VENDOR_SELECTION_LOCK_DAYS;
+
+export function configureVendorSelectionLockDays(days) {
+  const parsed = Number.parseInt(String(days), 10);
+  if (Number.isInteger(parsed) && parsed >= 1 && parsed <= 365) {
+    configuredLockDays = parsed;
+  }
+  return configuredLockDays;
+}
+
+export function getConfiguredVendorSelectionLockDays() {
+  return configuredLockDays;
+}
+
 function pad(value) {
   return String(value).padStart(2, '0');
 }
@@ -58,7 +72,7 @@ export function getVendorSelectionLock(eventDate, now = new Date()) {
   }
 
   const today = farmTodayISO(now);
-  const deadlineDate = shiftFarmISODate(eventDate, -VENDOR_SELECTION_LOCK_DAYS);
+  const deadlineDate = shiftFarmISODate(eventDate, -configuredLockDays);
   const daysUntilDeadline = daysBetweenFarmISO(deadlineDate, today);
   const daysUntilEvent = daysBetweenFarmISO(eventDate, today);
 

@@ -40,8 +40,8 @@ export function bookingToForm(booking) {
   return {
     clientId: booking.clientId || '',
     name: booking.name || '',
-    eventName: booking.eventName || '',
-    eventType: booking.eventType || '',
+    eventName: correctWeddingSpelling(booking.eventName || ''),
+    eventType: correctWeddingSpelling(booking.eventType || ''),
     eventDate: booking.eventDate || '',
     eventStartTime: normalizeTime(booking.eventStartTime),
     eventEndTime: normalizeTime(booking.eventEndTime),
@@ -108,12 +108,16 @@ export function validateBookingForm(values) {
   return errors;
 }
 
+function correctWeddingSpelling(value) {
+  return String(value || '').replace(/\bweeding\b/gi, 'Wedding');
+}
+
 export function toBookingPayload(values) {
   return {
     clientId: String(values.clientId || '').trim() || null,
     name: values.name.trim(),
-    eventName: String(values.eventName || '').trim(),
-    eventType: String(values.eventType || '').trim() || null,
+    eventName: correctWeddingSpelling(String(values.eventName || '').trim()),
+    eventType: correctWeddingSpelling(String(values.eventType || '').trim()) || null,
     eventDate: values.eventDate,
     eventStartTime: normalizeTime(values.eventStartTime),
     eventEndTime: normalizeTime(values.eventEndTime),

@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { Link } from 'react-router-dom';
+import { fetchVendorSelectionOverview } from '../../api/vendorCategories.js';
 import { getSession } from '../../auth/session.js';
 import AttentionList from '../../components/admin/dashboard/AttentionList.jsx';
 import DashboardCard from '../../components/admin/dashboard/DashboardCard.jsx';
@@ -40,15 +41,19 @@ function DashboardPage() {
     getClientsState,
   );
 
+  const [vendorCategoryOverview, setVendorCategoryOverview] = useState([]);
+
   useEffect(() => {
     loadBookings();
     loadClients();
+    fetchVendorSelectionOverview()
+      .then((categories) => setVendorCategoryOverview(categories || []))
+      .catch(() => setVendorCategoryOverview([]));
   }, []);
 
   const {
     dashboardSummary,
     upcomingEvents,
-    vendorCategoryOverview,
     attentionItems,
     recentActivity,
   } = useMemo(() => dashboardFromRecords({ bookings, clients }), [bookings, clients]);

@@ -133,8 +133,17 @@
 }
 
 @media (max-width: 480px) {
+  .login-form__actions {
+    flex-wrap: wrap;
+  }
+
   .login-form .button--pill {
+    flex: 1 1 100%;
     min-width: 0;
     padding: 0 24px;
+  }
+
+  .login-form__forgot {
+    height: 40px;
   }
 }

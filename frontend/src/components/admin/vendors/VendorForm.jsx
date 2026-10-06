@@ -1,8 +1,9 @@
-import { useMemo, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import FormField from '../clients/FormField.jsx';
 import {
   getVendorCategories,
   getVendorCategoryNames,
+  loadVendorCategories,
   subscribeVendorCategories,
 } from '../../../data/vendorCategoriesStore.js';
 import { emptyVendorForm, toVendorPayload, validateVendorForm } from './vendorForm.js';
@@ -25,6 +26,10 @@ function VendorForm({ initialValues = emptyVendorForm, submitLabel = 'Save', onS
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  useEffect(() => {
+    loadVendorCategories();
+  }, []);
+
   function updateField(name, value) {
     setValues((current) => ({ ...current, [name]: value }));
     setErrors((current) => {
@@ -38,7 +43,7 @@ function VendorForm({ initialValues = emptyVendorForm, submitLabel = 'Save', onS
     });
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault();
     const nextErrors = validateVendorForm(values);
     setErrors(nextErrors);
@@ -52,8 +57,13 @@ function VendorForm({ initialValues = emptyVendorForm, submitLabel = 'Save', onS
     }
 
     setIsSubmitting(true);
-    onSubmit(toVendorPayload(values));
-    setIsSubmitting(false);
+    try {
+      await onSubmit(toVendorPayload(values));
+    } catch (err) {
+      setErrors({ name: err.message || 'Unable to save vendor' });
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (

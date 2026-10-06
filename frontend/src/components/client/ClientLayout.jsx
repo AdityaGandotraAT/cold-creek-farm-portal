@@ -1,6 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { clearSession, getSession } from '../../auth/session.js';
+import {
+  getClientNotificationsUnreadCount,
+  refreshClientUnreadCount,
+  subscribeClientNotifications,
+} from '../../data/clientNotificationsStore.js';
+import { useSessionTimeout } from '../../auth/useSessionTimeout.js';
 import { AdminThemeProvider, useAdminTheme } from '../admin/AdminTheme.jsx';
 import '../admin/admin.css';
 import './client.css';
@@ -36,6 +42,16 @@ function ClientShell() {
   const navigate = useNavigate();
   const session = getSession();
   const page = pageMeta(location.pathname);
+  const unreadCount = useSyncExternalStore(
+    subscribeClientNotifications,
+    getClientNotificationsUnreadCount,
+    getClientNotificationsUnreadCount,
+  );
+  useSessionTimeout();
+
+  useEffect(() => {
+    refreshClientUnreadCount();
+  }, [location.pathname]);
 
   useEffect(() => {
     const media = window.matchMedia('(max-width: 960px)');
@@ -112,6 +128,7 @@ function ClientShell() {
         collapsed={!isCompact && collapsed}
         hidden={isCompact && !menuOpen}
         onLogout={handleLogout}
+        unreadCount={unreadCount}
       />
       <div className="admin-main">
         <ClientHeader

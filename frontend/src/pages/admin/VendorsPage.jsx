@@ -1,4 +1,4 @@
-import { useMemo, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Icon } from '../../components/admin/AdminIcons.jsx';
 import Filter from '../../components/admin/clients/Filter.jsx';
@@ -7,8 +7,13 @@ import SearchBar from '../../components/admin/clients/SearchBar.jsx';
 import '../../components/admin/clients/clients.css';
 import VendorTable from '../../components/admin/vendors/VendorTable.jsx';
 import '../../components/admin/vendors/vendors.css';
-import { vendorCategories } from '../../data/vendorsMock.js';
-import { getVendors, subscribeVendors } from '../../data/vendorsStore.js';
+import {
+  getVendorCategories,
+  getVendorCategoryNames,
+  loadVendorCategories,
+  subscribeVendorCategories,
+} from '../../data/vendorCategoriesStore.js';
+import { getVendors, loadVendors, subscribeVendors } from '../../data/vendorsStore.js';
 
 function matchesSearch(vendor, query) {
   if (!query) {
@@ -26,9 +31,23 @@ function VendorsPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const vendors = useSyncExternalStore(subscribeVendors, getVendors, getVendors);
+  const categoryRecords = useSyncExternalStore(
+    subscribeVendorCategories,
+    getVendorCategories,
+    getVendorCategories,
+  );
+  const categoryNames = useMemo(
+    () => getVendorCategoryNames({ includeInactive: true }),
+    [categoryRecords],
+  );
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState(searchParams.get('category') || '');
   const normalizedQuery = query.trim().toLowerCase();
+
+  useEffect(() => {
+    loadVendors();
+    loadVendorCategories();
+  }, []);
 
   const visibleVendors = useMemo(
     () =>
@@ -73,7 +92,7 @@ function VendorsPage() {
             onChange={(event) => setCategory(event.target.value)}
           >
             <option value="">All Categories</option>
-            {vendorCategories.map((option) => (
+            {categoryNames.map((option) => (
               <option key={option} value={option}>
                 {option}
               </option>
