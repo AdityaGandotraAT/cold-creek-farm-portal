@@ -7,6 +7,25 @@ dotenv.config({ path: path.join(backendRoot, '.env'), quiet: true });
 
 const useSsl = process.env.DB_SSL === 'true';
 
+function resolvePortalUrl() {
+  const explicit = String(process.env.PORTAL_URL || '').trim();
+  if (explicit) {
+    return explicit.replace(/\/$/, '');
+  }
+
+  const productionHost = String(process.env.VERCEL_PROJECT_PRODUCTION_URL || '').trim();
+  if (productionHost) {
+    return `https://${productionHost}`.replace(/\/$/, '');
+  }
+
+  const deploymentHost = String(process.env.VERCEL_URL || '').trim();
+  if (deploymentHost) {
+    return `https://${deploymentHost}`.replace(/\/$/, '');
+  }
+
+  return 'http://localhost:3000';
+}
+
 export const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
   host: process.env.HOST || '0.0.0.0',
@@ -25,7 +44,7 @@ export const env = {
     expiresIn: process.env.JWT_EXPIRES_IN || '8h',
     rememberExpiresIn: process.env.JWT_REMEMBER_EXPIRES_IN || '30d',
   },
-  portalUrl: (process.env.PORTAL_URL || 'http://localhost:3000').replace(/\/$/, ''),
+  portalUrl: resolvePortalUrl(),
   smtp: {
     host: process.env.SMTP_HOST || '',
     port: Number(process.env.SMTP_PORT) || 587,
