@@ -393,19 +393,6 @@
   outline-offset: 2px;
 }
 
-.clients-modal__close {
-  padding: 8px 14px;
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  background: var(--color-surface);
-  cursor: pointer;
-}
-
-.clients-modal__close:focus-visible {
-  outline: 2px solid var(--color-focus);
-  outline-offset: 2px;
-}
-
 .clients-modal--success {
   text-align: center;
 }

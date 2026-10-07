@@ -38,8 +38,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .client-welcome,
-  .client-booking,
-  .client-stub {
+  .client-booking {
     animation: none;
   }
 }
@@ -339,12 +338,6 @@
   line-height: 1.55;
 }
 
-.client-stub {
-  max-width: 36rem;
-  padding: 28px 8px;
-  animation: client-welcome-in 0.45s ease both;
-}
-
 .client-stub__kicker {
   margin: 0 0 8px;
   color: var(--client-bronze);
@@ -352,19 +345,6 @@
   font-weight: 650;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-}
-
-.client-stub h2 {
-  margin: 0 0 10px;
-  font-family: var(--font-serif);
-  font-size: clamp(1.5rem, 2.5vw, 1.9rem);
-  font-weight: 600;
-}
-
-.client-stub p {
-  margin: 0;
-  color: var(--color-text-muted);
-  line-height: 1.5;
 }
 
 @media (max-width: 900px) {

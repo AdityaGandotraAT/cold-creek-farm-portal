@@ -19,12 +19,12 @@ function VendorTable({ vendors, onView, onEdit }) {
         <table className="clients-table vendors-table">
           <thead>
             <tr>
-              <th>Category</th>
-              <th>Name</th>
-              <th>Phone</th>
-              <th>Email</th>
-              <th>Website</th>
-              <th>Actions</th>
+              <th className="vendors-table__category">Category</th>
+              <th className="vendors-table__name">Name</th>
+              <th className="vendors-table__phone">Phone</th>
+              <th className="vendors-table__email">Email</th>
+              <th className="vendors-table__website">Website</th>
+              <th className="vendors-table__actions">Actions</th>
             </tr>
           </thead>
           <tbody>

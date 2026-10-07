@@ -16,9 +16,5 @@
     "seed:vendors": "npm run seed:vendors --prefix backend",
     "vercel-install": "npm install --prefix frontend --include=dev && npm install --prefix backend",
     "vercel-build": "npm run build --prefix frontend"
-  },
-  "dependencies": {
-    "@neon/config": "^1.3.2",
-    "@neon/env": "^1.2.3"
   }
 }

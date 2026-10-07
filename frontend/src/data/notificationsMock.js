@@ -9,5 +9,3 @@ export const notificationTypeOptions = [
 ];
 
 export const notificationStatusOptions = ['Unread', 'Read'];
-
-export const seedNotifications = [];

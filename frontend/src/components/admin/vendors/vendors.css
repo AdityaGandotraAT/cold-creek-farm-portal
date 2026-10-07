@@ -1,5 +1,64 @@
 .vendors-table {
-  min-width: 980px;
+  width: 100%;
+  min-width: 1000px;
+  table-layout: fixed;
+}
+
+.vendors-table th,
+.vendors-table td {
+  padding: 12px 10px;
+}
+
+.vendors-table__category,
+.vendors-table__name {
+  line-height: 1.35;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.vendors-table__category {
+  width: 22%;
+}
+
+.vendors-table__name {
+  width: 20%;
+}
+
+.vendors-table__phone {
+  width: 13%;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.vendors-table__email {
+  width: 20%;
+  line-height: 1.35;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.vendors-table__website {
+  width: 11%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vendors-table__website a {
+  color: var(--color-accent);
+}
+
+.vendors-table__actions {
+  width: 14%;
+  white-space: nowrap;
+}
+
+.vendors-table__actions .clients-table__actions {
+  flex-wrap: nowrap;
+}
+
+.vendors-table .clients-action {
+  padding: 6px 8px;
 }
 
 .vendors-table-wrap {
