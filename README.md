@@ -86,6 +86,10 @@ Set the same `SMTP_*` and `PORTAL_URL` variables in the production host secrets.
 3. Frontend redirects to `/change-password` (admin routes are blocked until changed).
 4. Client submits current temporary password + new password (`POST /api/auth/change-password`).
 5. Backend updates `password_hash` and sets `must_change_password = false`.
-6. Client can then use the normal client portal entry (`/client` placeholder until full client UI is built).
+6. Client can then use the client portal (`/client`).
+
+What the admin portal, client portal, and vendor-reply emails do is written up in [docs/FUNCTIONALITY.md](docs/FUNCTIONALITY.md).
+
+What those flows were tested for is written up in [docs/TEST_PLAN.md](docs/TEST_PLAN.md).
 
 Architecture note: login credentials live on the existing `users` table (not duplicated onto `clients`). New clients get `clients.user_id` pointing at their `CLIENT` user row.
