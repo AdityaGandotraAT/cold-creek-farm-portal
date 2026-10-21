@@ -6,6 +6,7 @@ import AttentionList from '../../components/admin/dashboard/AttentionList.jsx';
 import DashboardCard from '../../components/admin/dashboard/DashboardCard.jsx';
 import RecentActivity from '../../components/admin/dashboard/RecentActivity.jsx';
 import UpcomingEvents from '../../components/admin/dashboard/UpcomingEvents.jsx';
+import VendorBookingsPanel from '../../components/admin/dashboard/VendorBookingsPanel.jsx';
 import VendorSelectionOverview from '../../components/admin/dashboard/VendorSelectionOverview.jsx';
 import '../../components/admin/dashboard/dashboard.css';
 import { getBookingsState, loadBookings, subscribeBookings } from '../../data/bookingsStore.js';
@@ -104,6 +105,8 @@ function DashboardPage() {
           />
         ))}
       </section>
+
+      <VendorBookingsPanel />
 
       <UpcomingEvents events={upcomingEvents} />
 
