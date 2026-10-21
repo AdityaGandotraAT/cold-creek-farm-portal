@@ -27,7 +27,60 @@ async function validateVendorInput(input) {
   }
 }
 
-export async function listVendors({ activeOnly = false, includeAll = false } = {}) {
+function vendorBookingKey(name, category) {
+  return `${String(name || '').trim().toLowerCase()}\n${String(category || '').trim().toLowerCase()}`;
+}
+
+function mapVendorBookingRow(row) {
+  return {
+    id: row.id,
+    referenceNumber: row.reference_number,
+    eventName: row.event_name,
+    clientName: row.client_name || row.booking_name,
+    eventDate: row.event_date,
+    category: row.category,
+    selectionStatus: row.selection_status,
+  };
+}
+
+const VENDOR_BOOKING_SELECT = `
+  SELECT b.id,
+         b.reference_number,
+         b.event_name,
+         b.name AS booking_name,
+         to_char(b.event_date, 'YYYY-MM-DD') AS event_date,
+         s.vendor_name,
+         s.category,
+         s.selection_status,
+         NULLIF(trim(concat_ws(' ', c.first_name, c.last_name)), '') AS client_name
+  FROM booking_vendor_selections s
+  JOIN bookings b ON b.id = s.booking_id
+  LEFT JOIN clients c ON c.id = b.client_id
+  WHERE s.selection_status IN ('Confirmed', 'Pending', 'Unavailable')
+`;
+
+async function bookingsByVendor() {
+  const result = await query(
+    `${VENDOR_BOOKING_SELECT}
+     ORDER BY b.event_date ASC, b.event_name ASC`,
+  );
+  const grouped = new Map();
+
+  for (const row of result.rows) {
+    const key = vendorBookingKey(row.vendor_name, row.category);
+    const current = grouped.get(key) || [];
+    current.push(mapVendorBookingRow(row));
+    grouped.set(key, current);
+  }
+
+  return grouped;
+}
+
+export async function listVendors({
+  activeOnly = false,
+  includeAll = false,
+  includeBookings = false,
+} = {}) {
   const result = await query(
     `SELECT ${VENDOR_COLUMNS}
      FROM vendors
@@ -46,6 +99,14 @@ export async function listVendors({ activeOnly = false, includeAll = false } = {
     );
   }
 
+  if (includeBookings) {
+    const grouped = await bookingsByVendor();
+    vendors = vendors.map((vendor) => ({
+      ...vendor,
+      bookings: grouped.get(vendorBookingKey(vendor.name, vendor.category)) || [],
+    }));
+  }
+
   return vendors;
 }
 
@@ -59,6 +120,25 @@ export async function getVendorById(id) {
   );
 
   return rowToVendor(result.rows[0]);
+}
+
+export async function listVendorBookings(id) {
+  const vendor = await getVendorById(id);
+  if (!vendor) {
+    return null;
+  }
+
+  const result = await query(
+    `${VENDOR_BOOKING_SELECT}
+       AND lower(trim(s.vendor_name)) = lower(trim($1))
+       AND lower(trim(s.category)) = lower(trim($2))
+     ORDER BY b.event_date ASC, b.event_name ASC`,
+    [vendor.name, vendor.category],
+  );
+
+  const bookings = result.rows.map(mapVendorBookingRow);
+
+  return { count: bookings.length, bookings };
 }
 
 export async function createVendor(body) {

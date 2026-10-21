@@ -53,6 +53,67 @@ test('client catalog only includes the test vendor while the product is not live
   await query('DELETE FROM vendors WHERE id = $1', [hidden.body.vendor.id]);
 });
 
+test('admin can see the bookings aligned with a vendor', async () => {
+  const admin = await adminToken();
+  const vendorName = `Aligned Vendor ${Date.now()}`;
+  const eventName = `Aligned Event ${Date.now()}`;
+
+  const vendorRes = await request(app)
+    .post('/api/vendors')
+    .set('Authorization', `Bearer ${admin}`)
+    .send({
+      name: vendorName,
+      category: 'Florist',
+      email: process.env.VENDOR_TEST_EMAIL || `aligned.${Date.now()}@email.com`,
+    });
+  assert.equal(vendorRes.status, 201);
+  const vendorId = vendorRes.body.vendor.id;
+
+  const bookingRes = await request(app)
+    .post('/api/bookings')
+    .set('Authorization', `Bearer ${admin}`)
+    .send({
+      name: 'Aligned Couple',
+      eventName,
+      eventDate: '2026-11-14',
+      eventStartTime: '16:00',
+      eventEndTime: '22:00',
+      guests: 80,
+      bookingStatus: 'Pending',
+    });
+  assert.equal(bookingRes.status, 201);
+  const bookingId = bookingRes.body.booking.id;
+
+  await query(
+    `UPDATE booking_vendor_selections
+     SET vendor_name = $2, selection_status = 'Pending'
+     WHERE booking_id = $1 AND category = 'Florist'`,
+    [bookingId, vendorName],
+  );
+
+  const aligned = await request(app)
+    .get(`/api/vendors/${vendorId}/bookings`)
+    .set('Authorization', `Bearer ${admin}`);
+
+  assert.equal(aligned.status, 200);
+  assert.equal(aligned.body.count, 1);
+  assert.equal(aligned.body.bookings[0].eventName, eventName);
+  assert.equal(aligned.body.bookings[0].clientName, 'Aligned Couple');
+  assert.equal(aligned.body.bookings[0].category, 'Florist');
+  assert.equal(aligned.body.bookings[0].selectionStatus, 'Pending');
+
+  const list = await request(app).get('/api/vendors').set('Authorization', `Bearer ${admin}`);
+  assert.equal(list.status, 200);
+  const listed = list.body.vendors.find((vendor) => vendor.id === vendorId);
+  assert.ok(listed, 'vendor is missing from the vendors list');
+  assert.equal(listed.bookings.length, 1);
+  assert.equal(listed.bookings[0].eventName, eventName);
+  assert.equal(listed.bookings[0].clientName, 'Aligned Couple');
+
+  await request(app).delete(`/api/bookings/${bookingId}`).set('Authorization', `Bearer ${admin}`);
+  await query('DELETE FROM vendors WHERE id = $1', [vendorId]);
+});
+
 test.after(async () => {
   await pool.end();
 });

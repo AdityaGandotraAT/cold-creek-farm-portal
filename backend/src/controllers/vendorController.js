@@ -2,6 +2,7 @@ import {
   createVendor,
   deleteVendor,
   getVendorById,
+  listVendorBookings,
   listVendors,
   updateVendor,
 } from '../services/vendorService.js';
@@ -9,7 +10,7 @@ import { HttpError } from '../utils/httpError.js';
 
 export async function getVendors(_req, res, next) {
   try {
-    const vendors = await listVendors();
+    const vendors = await listVendors({ includeBookings: true });
     res.status(200).json({ status: 'ok', vendors });
   } catch (err) {
     next(err);
@@ -24,6 +25,19 @@ export async function getVendor(req, res, next) {
     }
 
     res.status(200).json({ status: 'ok', vendor });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function getVendorBookings(req, res, next) {
+  try {
+    const result = await listVendorBookings(req.params.vendorId);
+    if (!result) {
+      throw new HttpError(404, 'Vendor not found');
+    }
+
+    res.status(200).json({ status: 'ok', count: result.count, bookings: result.bookings });
   } catch (err) {
     next(err);
   }

@@ -20,7 +20,19 @@ function matchesSearch(vendor, query) {
     return true;
   }
 
-  const haystack = [vendor.name, vendor.category, vendor.email, vendor.phone, vendor.website]
+  const haystack = [
+    vendor.name,
+    vendor.category,
+    vendor.email,
+    vendor.phone,
+    vendor.website,
+    ...(vendor.bookings || []).flatMap((booking) => [
+      booking.eventName,
+      booking.clientName,
+      booking.referenceNumber,
+      booking.selectionStatus,
+    ]),
+  ]
     .join(' ')
     .toLowerCase();
 
@@ -69,7 +81,7 @@ function VendorsPage() {
     <div className="clients-page">
       <PageHeader
         title="Vendors"
-        description="The Cold Creek Farm preferred vendor list: category, name, phone, email, and website."
+        description="The preferred vendor list. Bookings shows which events each vendor is aligned with."
         action={
           <button className="clients-add" type="button" onClick={() => navigate('/admin/vendors/new')}>
             <Icon name="plus" />
@@ -83,7 +95,7 @@ function VendorsPage() {
           id="vendor-search"
           value={query}
           onChange={setQuery}
-          placeholder="Search by name, category, email, or phone"
+          placeholder="Search by name, category, email, phone, or booking"
         />
         <Filter id="vendor-category-filter" label="Category">
           <select

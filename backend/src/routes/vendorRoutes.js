@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   getVendor,
+  getVendorBookings,
   getVendors,
   postVendor,
   putVendor,
@@ -15,6 +16,7 @@ router.use(authenticate, requireAdmin);
 
 router.get('/', getVendors);
 router.post('/', postVendor);
+router.get('/:vendorId/bookings', getVendorBookings);
 router.get('/:vendorId', getVendor);
 router.put('/:vendorId', putVendor);
 router.delete('/:vendorId', removeVendor);

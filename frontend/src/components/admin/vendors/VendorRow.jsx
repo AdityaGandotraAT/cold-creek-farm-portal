@@ -1,4 +1,5 @@
 import { Icon } from '../AdminIcons.jsx';
+import VendorBookingLines from './VendorBookingLines.jsx';
 
 function breakableEmail(email) {
   const at = email.indexOf('@');
@@ -21,6 +22,9 @@ function VendorRow({ vendor, onView, onEdit }) {
       </td>
       <td className="vendors-table__phone">{vendor.phone || '—'}</td>
       <td className="vendors-table__email">{vendor.email ? breakableEmail(vendor.email) : '—'}</td>
+      <td className="vendors-table__bookings">
+        <VendorBookingLines bookings={vendor.bookings} />
+      </td>
       <td className="vendors-table__website">
         {vendor.website ? (
           <a href={vendor.website} target="_blank" rel="noreferrer" title={vendor.website}>

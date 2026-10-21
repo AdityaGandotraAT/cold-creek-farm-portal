@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import PageHeader from '../../components/admin/clients/PageHeader.jsx';
 import '../../components/admin/clients/addClient.css';
 import '../../components/admin/clients/clients.css';
+import VendorBookings from '../../components/admin/vendors/VendorBookings.jsx';
 import VendorDetail from '../../components/admin/vendors/VendorDetail.jsx';
 import '../../components/admin/vendors/vendors.css';
 import { ensureVendor, getVendorById } from '../../data/vendorsStore.js';
@@ -84,6 +85,7 @@ function VendorDetailPage() {
         }
       />
       <VendorDetail vendor={vendor} />
+      <VendorBookings vendorId={vendor.id} />
     </div>
   );
 }

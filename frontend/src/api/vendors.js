@@ -26,6 +26,14 @@ export async function fetchVendors() {
   return data.vendors;
 }
 
+export async function fetchVendorBookings(vendorId) {
+  const response = await fetch(`/api/vendors/${vendorId}/bookings`, {
+    headers: authHeaders(),
+  });
+  const data = await parseResponse(response);
+  return data;
+}
+
 export async function fetchVendor(vendorId) {
   const response = await fetch(`/api/vendors/${vendorId}`, {
     headers: authHeaders(),

@@ -1,4 +1,5 @@
 import { Icon } from '../AdminIcons.jsx';
+import VendorBookingLines from './VendorBookingLines.jsx';
 
 function VendorCard({ vendor, onView, onEdit }) {
   return (
@@ -9,6 +10,7 @@ function VendorCard({ vendor, onView, onEdit }) {
           <div className="clients-table__ref">{vendor.category}</div>
         </div>
       </div>
+      <VendorBookingLines bookings={vendor.bookings} />
       <p>{vendor.phone || '—'}</p>
       <p>{vendor.email || '—'}</p>
       <p>{vendor.website ? vendor.website.replace(/^https?:\/\//i, '') : '—'}</p>

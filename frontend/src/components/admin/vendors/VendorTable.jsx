@@ -23,6 +23,7 @@ function VendorTable({ vendors, onView, onEdit }) {
               <th className="vendors-table__name">Name</th>
               <th className="vendors-table__phone">Phone</th>
               <th className="vendors-table__email">Email</th>
+              <th className="vendors-table__bookings">Bookings</th>
               <th className="vendors-table__website">Website</th>
               <th className="vendors-table__actions">Actions</th>
             </tr>

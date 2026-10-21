@@ -19,6 +19,7 @@ npm install --prefix backend
 npm install --prefix frontend
 npm run migrate
 npm run seed:auth
+npm run seed:vendors
 ```
 
 3. Build frontend and start:
@@ -50,22 +51,28 @@ Configure these in `backend/.env` (never in the React app, never commit real sec
 
 ```
 PORTAL_URL=http://localhost:3000
-SMTP_HOST=
+SMTP_HOST=smtp.resend.com
 SMTP_PORT=587
-SMTP_USER=info@coldcreekfarm.com
+SMTP_USER=resend
 SMTP_PASSWORD=
 SMTP_SECURE=false
-SMTP_FROM=info@coldcreekfarm.com
+SMTP_FROM=marketing@coldcreekfarm.com
+SMTP_OWNER_EMAIL=jeff@coldcreekfarm.com
+SMTP_REPLY_TO=jeff@coldcreekfarm.com
+NOTIFY_VENDORS=false
+VENDOR_TEST_EMAIL=
 ```
 
-- `PORTAL_URL` — public base URL used in the email (`{{PORTAL_URL}}/login`)
-- `SMTP_*` — provider-independent SMTP settings
-- Intended From address: `info@coldcreekfarm.com`
-- The Cold Creek Farm email administrator must supply the real SMTP host/password once the mailbox provider is confirmed (do not assume Microsoft 365 or Google Workspace)
+- `PORTAL_URL` — public base URL used in emails (`{{PORTAL_URL}}/login` and vendor reply links)
+- `SMTP_*` — provider-independent SMTP settings. The example host is Resend; any SMTP provider works
+- `SMTP_FROM` — public From address (`marketing@coldcreekfarm.com`)
+- `SMTP_OWNER_EMAIL` / `SMTP_REPLY_TO` — owner copy and reply address on portal emails
+- `NOTIFY_VENDORS` — set to `true` only when vendors should receive selection emails. While it is `false`, those emails go to `SMTP_OWNER_EMAIL` when email notifications are on
+- `VENDOR_TEST_EMAIL` — optional. If the selected vendor’s email matches this address, that inbox still receives the vendor-pick email during development
 
 ### Where to obtain SMTP credentials
 
-Ask the Cold Creek Farm email administrator for the mailbox SMTP host, port, username, and password for `info@coldcreekfarm.com` (or the approved sending address). Put those values only in server environment variables / hosting secrets.
+Ask the Cold Creek Farm email administrator for the SMTP host, port, username, and password for the approved sending address. Put those values only in server environment variables / hosting secrets.
 
 ### Local email testing
 
@@ -83,13 +90,21 @@ Set the same `SMTP_*` and `PORTAL_URL` variables in the production host secrets.
 
 1. Client signs in at `/login` with email + temporary password.
 2. API returns `mustChangePassword: true`.
-3. Frontend redirects to `/change-password` (admin routes are blocked until changed).
+3. Frontend redirects to `/change-password`. Admin and client routes stay blocked until the password is changed.
 4. Client submits current temporary password + new password (`POST /api/auth/change-password`).
 5. Backend updates `password_hash` and sets `must_change_password = false`.
 6. Client can then use the client portal (`/client`).
 
-What the admin portal, client portal, and vendor-reply emails do is written up in [docs/FUNCTIONALITY.md](docs/FUNCTIONALITY.md).
+## Vendors
 
-What those flows were tested for is written up in [docs/TEST_PLAN.md](docs/TEST_PLAN.md).
+Admin → Vendors has three pages:
+
+1. **All Vendors** — the preferred vendor directory (category, name, phone, email, website). The Bookings column on this page shows every event that vendor is aligned with: client, date, and status. Only Active vendors are offered to clients. Opening a vendor shows the same bookings again.
+2. **Categories** — Florist, Photographers, Catering, DJs, Rentals, and Wedding Officiants are required for every event and cannot be renamed, disabled, or removed. Other categories are optional: an admin can add, rename, or set them Inactive. An Inactive category is hidden from clients.
+3. **Selections** — monitoring only. It shows each booking’s progress on the six required categories and whether selections are still Open or Locked. Clients choose the vendors on their own Vendor Selections page. A choice starts as Pending; the vendor accepts or marks unavailable from the email link. Selections lock a set number of days before the event (default 90, changed in Settings).
+
+On All Vendors, the Bookings column lists every booking for that vendor. Vendors with no events show “No bookings.”
+
+`npm run seed:vendors` loads the preferred vendor list. `npm run seed:clients` and `npm run seed:bookings` do not insert sample records.
 
 Architecture note: login credentials live on the existing `users` table (not duplicated onto `clients`). New clients get `clients.user_id` pointing at their `CLIENT` user row.
