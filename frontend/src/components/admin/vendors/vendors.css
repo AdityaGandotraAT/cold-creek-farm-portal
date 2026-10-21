@@ -14,6 +14,10 @@
   vertical-align: top;
 }
 
+.vendors-table tbody td.vendors-table__actions {
+  overflow: visible;
+}
+
 .vendors-table__category,
 .vendors-table__name,
 .vendors-table__email {
@@ -103,7 +107,7 @@
 }
 
 .vendors-table__website {
-  width: 8%;
+  width: 9%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -114,16 +118,20 @@
 }
 
 .vendors-table__actions {
-  width: 12%;
-  white-space: nowrap;
+  width: 11%;
 }
 
 .vendors-table__actions .clients-table__actions {
+  flex-direction: column;
+  align-items: stretch;
   flex-wrap: nowrap;
 }
 
 .vendors-table .clients-action {
+  justify-content: center;
+  width: 100%;
   padding: 6px 8px;
+  box-sizing: border-box;
 }
 
 .vendors-table-wrap {
