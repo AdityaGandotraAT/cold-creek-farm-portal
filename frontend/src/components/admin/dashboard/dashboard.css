@@ -178,6 +178,38 @@
   color: var(--color-badge-alert-text);
 }
 
+.admin-shell[data-theme='dark'] .dashboard-card {
+  border-color: #3d4a42;
+  background: linear-gradient(165deg, #2e3b33 0%, #243028 100%);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 10px 28px rgba(0, 0, 0, 0.28);
+}
+
+.admin-shell[data-theme='dark'] .dashboard-card.is-link:hover,
+.admin-shell[data-theme='dark'] .dashboard-card.is-link:focus-visible {
+  border-color: rgba(196, 165, 122, 0.55);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.35);
+}
+
+.admin-shell[data-theme='dark'] .dashboard-card__icon {
+  background: rgba(196, 165, 122, 0.16);
+  border-color: rgba(196, 165, 122, 0.45);
+  color: #f0e2c8;
+}
+
+.admin-shell[data-theme='dark'] .dashboard-card--pending .dashboard-card__icon {
+  background: rgba(196, 165, 122, 0.22);
+  border-color: rgba(212, 180, 138, 0.5);
+  color: #f3e4c4;
+}
+
+.admin-shell[data-theme='dark'] .dashboard-card--alert .dashboard-card__icon {
+  background: rgba(196, 110, 98, 0.22);
+  border-color: rgba(201, 137, 128, 0.5);
+  color: #f6d2cb;
+}
+
 .dashboard-card__label,
 .dashboard-card__hint {
   margin: 0;
