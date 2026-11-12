@@ -36,7 +36,7 @@ function vendor(fields) {
     phone: fields.phone || '',
     email: fields.email || '',
     website: fields.website || '',
-    status: 'Active',
+    status: fields.status || 'Active',
   };
   nextVendorId += 1;
   return record;
@@ -140,14 +140,6 @@ export const seedVendors = [
     website: 'http://momoluxphoto.com',
     description: 'Photography and videography.',
     services: 'Wedding photography and videography',
-  }),
-  vendor({
-    name: 'Aditya',
-    company: 'Aditya',
-    category: 'Videographers',
-    email: 'aditya@agreedtechnologies.com',
-    description: 'Test videographer for portal development. Remove before launch.',
-    services: 'Wedding videography (test)',
   }),
   vendor({
     name: 'Jeremy & Tracie Grizzle',

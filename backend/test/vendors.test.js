@@ -42,7 +42,6 @@ test('client catalog only includes the test vendor while the product is not live
 
   assert.equal(catalog.status, 200);
   assert.ok(Array.isArray(catalog.body.vendors));
-  assert.ok(catalog.body.vendors.some((vendor) => vendor.name === 'Aditya'));
   assert.ok(
     catalog.body.vendors.every(
       (vendor) => String(vendor.email || '').toLowerCase() === 'aditya@agreedtechnologies.com',
